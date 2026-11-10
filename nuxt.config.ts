@@ -1,4 +1,6 @@
-// NioGabay/nuxt.config.ts
+
+import tailwindcss from '@tailwindcss/vite'
+
 export default defineNuxtConfig({
   modules: ['nuxt-auth-utils'],
   compatibilityDate: '2025-07-15',
@@ -16,6 +18,14 @@ export default defineNuxtConfig({
         types: ['node'],
       },
     },
+  },
+
+  css: ['~/assets/css/main.css'],
+
+  vite: {
+    plugins: [
+      tailwindcss(),
+    ],
   },
 
   runtimeConfig: {
