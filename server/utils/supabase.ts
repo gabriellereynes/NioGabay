@@ -4,13 +4,13 @@ export const serverSupabase = () => {
   const config = useRuntimeConfig()
 
   return createClient(
-    config.supabaseUrl,
+    config.public.supabaseUrl,
     config.supabaseServiceRoleKey,
     {
       auth: {
         persistSession: false,
-        autoRefreshToken: false
-      }
-    }
+        autoRefreshToken: false,
+      },
+    },
   )
 }
