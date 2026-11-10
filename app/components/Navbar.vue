@@ -3,6 +3,7 @@
 import { ref } from 'vue'
 
 const isMenuOpen = ref(false)
+const { me } = useAuth()
 
 const navLinks = [
   { label: 'Home', path: '/' },
@@ -47,6 +48,19 @@ const navLinks = [
           Subscribe to SMS Alerts
         </NuxtLink>
 
+        <!-- AUTHENTICATED USER MENU (DESKTOP) -->
+        <div v-if="me" class="flex items-center gap-3 border-l border-slate-200 pl-6">
+          <span class="text-sm font-medium text-slate-700">
+            {{ me.full_name }}
+            <span class="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500 uppercase">{{ me.role }}</span>
+          </span>
+          <LogoutButton />
+        </div>
+
+
+
+
+
       </div>
 
       <!-- MOBILE MENU BUTTON -->
@@ -88,6 +102,15 @@ const navLinks = [
         >
           Subscribe to SMS Alerts
         </NuxtLink>
+
+        <!-- AUTHENTICATED USER MENU (MOBILE) -->
+        <div v-if="me" class="mt-2 flex flex-col gap-3 border-t border-slate-200 pt-4">
+          <div class="text-sm font-medium text-slate-700">
+            {{ me.full_name }}
+            <span class="ml-1 rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500 uppercase">{{ me.role }}</span>
+          </div>
+          <LogoutButton @click="isMenuOpen = false" />
+        </div>
 
       </div>
     </div>
