@@ -20,7 +20,7 @@ export default defineNuxtConfig({
     },
   },
 
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/tailwind.css', '~/assets/css/main.css'],
 
   vite: {
     plugins: [
@@ -30,6 +30,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     supabaseServiceRoleKey: '',
+    mockAuthEnabled: process.env.NUXT_MOCK_AUTH !== 'false',
     public: {
       supabaseUrl: '',
       supabasePublishableKey: '',

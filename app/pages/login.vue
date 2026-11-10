@@ -10,18 +10,21 @@ const error = ref('')
 const busy = ref(false)
  
 // After login, go back to the page the person wanted, but only to a page on THIS site.
-const safeRedirect = () => {
+const safeRedirect = (role: 'admin' | 'staff') => {
   const target = route.query.redirect
   const ok = typeof target === 'string' && target.startsWith('/') && !target.startsWith('//') && !target.includes('\\')
-  return ok ? target : '/'
+  if (!ok) return role === 'admin' ? '/system-admin' : '/staff'
+  if (target.startsWith('/system-admin') && role !== 'admin') return '/staff'
+  if (target.startsWith('/staff') && role !== 'admin' && role !== 'staff') return '/staff'
+  return target
 }
  
 const submit = async () => {
   error.value = ''
   busy.value = true
   try {
-    await login({ email: email.value, password: password.value })
-    await navigateTo(safeRedirect())
+    const person = await login({ email: email.value, password: password.value })
+    await navigateTo(safeRedirect(person.role))
   } catch (e: any) {
     error.value = e?.data?.statusMessage || e?.statusMessage || 'Could not log in. Please try again.'
   } finally {
@@ -33,7 +36,7 @@ const submit = async () => {
 <template>
   <main class="login">
     <h1>NioGabay</h1>
-    <p>Barangay staff login</p>
+    <p>Sign in as a system administrator or staff member.</p>
  
     <form @submit.prevent="submit">
       <label>
@@ -49,6 +52,12 @@ const submit = async () => {
  
       <button type="submit" :disabled="busy">{{ busy ? 'Logging in...' : 'Log in' }}</button>
     </form>
+
+    <aside class="demo-accounts">
+      <strong>Development mock accounts</strong>
+      <small>Admin: mock.admin@niogabay.local / Admin123!</small>
+      <small>Staff: mock.staff@niogabay.local / Staff123!</small>
+    </aside>
   </main>
 </template>
  
@@ -59,4 +68,6 @@ label { display: grid; gap: 0.25rem; font-weight: 600; }
 input { padding: 0.6rem; font: inherit; border: 1px solid #888; border-radius: 6px; }
 button { padding: 0.7rem; font: inherit; font-weight: 600; border-radius: 6px; cursor: pointer; }
 .error { color: #b00020; margin: 0; }
+.demo-accounts { display: grid; gap: 0.25rem; margin-top: 1.5rem; padding: 0.75rem; background: #f3f5f5; border-radius: 6px; font-size: 0.8rem; }
+.demo-accounts small { color: #555; }
 </style>

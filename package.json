@@ -15,6 +15,7 @@
     "daisyui": "^5.7.50",
     "nuxt": "^4.6.4",
     "nuxt-auth-utils": "^0.6.2",
+    "sweetalert2": "^11.26.25",
     "tailwindcss": "^4.3.5",
     "vue": "^3.5.45",
     "vue-router": "^5.4.0"

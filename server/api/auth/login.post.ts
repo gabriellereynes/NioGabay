@@ -3,6 +3,7 @@
 // Supabase Auth checks the password. We then look up the person's NioGabay profile
 // (role, active or not) and remember who they are in a sealed login cookie.
 import type { Me, Role } from '../../../shared/types/api'
+import { findMockAccount } from '../../utils/mockAuth'
  
 const SESSION_HOURS = 8
  
@@ -13,6 +14,22 @@ export default defineEventHandler(async (event): Promise<Me> => {
  
   if (!email || email.length > 254 || !password || password.length > 200) {
     throw createError({ statusCode: 400, statusMessage: 'Email and password are required' })
+  }
+
+  const config = useRuntimeConfig()
+  if (config.mockAuthEnabled) {
+    const account = findMockAccount(email, password)
+    if (!account) {
+      throw createError({ statusCode: 401, statusMessage: 'Invalid email or password' })
+    }
+
+    await setUserSession(
+      event,
+      { user: { id: account.user.id, email: account.user.email } },
+      { maxAge: 60 * 60 * SESSION_HOURS }
+    )
+
+    return account.user
   }
  
   // --- 1. Check the password with Supabase Auth ------------------------

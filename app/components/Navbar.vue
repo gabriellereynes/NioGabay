@@ -43,7 +43,7 @@ const navLinks = [
 
         <NuxtLink
           to="/subscribe"
-          class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+          class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold !text-white shadow-sm transition hover:bg-blue-800"
         >
           Subscribe to SMS Alerts
         </NuxtLink>
@@ -97,7 +97,7 @@ const navLinks = [
 
         <NuxtLink
           to="/subscribe"
-          class="rounded-lg bg-blue-700 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-800"
+          class="rounded-lg bg-blue-700 px-5 py-3 text-center text-sm font-semibold !text-white transition hover:bg-blue-800"
           @click="isMenuOpen = false"
         >
           Subscribe to SMS Alerts

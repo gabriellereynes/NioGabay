@@ -70,7 +70,7 @@ const announcements = [
 
         <NuxtLink
           to="/subscribe"
-          class="mt-8 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-blue-900 shadow-md transition hover:bg-blue-100"
+          class="mt-8 inline-block rounded-lg bg-amber-400 px-6 py-3 font-semibold text-blue-950 shadow-md transition hover:bg-amber-300"
         >
           Get SMS Alerts
         </NuxtLink>
@@ -308,14 +308,16 @@ const announcements = [
           Stay Updated. Stay Prepared.
         </h2>
 
-        <p class="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-blue-100 md:text-base">
-          Subscribe to NioGabay SMS alerts to receive important flood-related
-          notifications and announcements.
+        <p class="mx-auto mt-4 flex w-full max-w-xl justify-center text-center text-sm leading-relaxed text-blue-100 md:text-base" style="text-align: center;">
+          <span class="block w-full text-center">
+            Subscribe to NioGabay SMS alerts to receive important flood-related
+            notifications and announcements.
+          </span>
         </p>
 
         <NuxtLink
           to="/subscribe"
-          class="mt-7 inline-block rounded-lg bg-white px-6 py-3 font-semibold text-blue-900 transition hover:bg-blue-100"
+          class="mt-7 inline-block rounded-lg bg-amber-400 px-6 py-3 font-semibold text-blue-950 transition hover:bg-amber-300"
         >
           Subscribe Now
         </NuxtLink>
