@@ -53,11 +53,6 @@ const submit = async () => {
       <button type="submit" :disabled="busy">{{ busy ? 'Logging in...' : 'Log in' }}</button>
     </form>
 
-    <aside class="demo-accounts">
-      <strong>Development mock accounts</strong>
-      <small>Admin: mock.admin@niogabay.local / Admin123!</small>
-      <small>Staff: mock.staff@niogabay.local / Staff123!</small>
-    </aside>
   </main>
 </template>
  
@@ -68,6 +63,4 @@ label { display: grid; gap: 0.25rem; font-weight: 600; }
 input { padding: 0.6rem; font: inherit; border: 1px solid #888; border-radius: 6px; }
 button { padding: 0.7rem; font: inherit; font-weight: 600; border-radius: 6px; cursor: pointer; }
 .error { color: #b00020; margin: 0; }
-.demo-accounts { display: grid; gap: 0.25rem; margin-top: 1.5rem; padding: 0.75rem; background: #f3f5f5; border-radius: 6px; font-size: 0.8rem; }
-.demo-accounts small { color: #555; }
 </style>
