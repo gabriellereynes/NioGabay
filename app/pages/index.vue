@@ -29,20 +29,6 @@ const announcements = [
     category: 'General',
     date: 'November 10, 2026',
     description: 'Residents can now monitor flood conditions and access safety information through NioGabay.'
-  },
-  {
-    id: 2,
-    title: 'Stay Alert During Heavy Rainfall',
-    category: 'Advisory',
-    date: 'November 9, 2026',
-    description: 'Residents are advised to remain alert and monitor flood conditions in their area.'
-  },
-  {
-    id: 3,
-    title: 'Know Your Nearest Evacuation Center',
-    category: 'Evacuation',
-    date: 'November 8, 2026',
-    description: 'Familiarize yourself with the nearest evacuation center in your community.'
   }
 ]
 </script>
