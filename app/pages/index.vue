@@ -193,6 +193,7 @@ onBeforeUnmount(() => {
     </section>
 
 
+
 <!-- CURRENT FLOOD STATUS -->
 <section class="px-5 py-12 md:px-8">
   <div class="mx-auto max-w-7xl">
@@ -206,7 +207,7 @@ onBeforeUnmount(() => {
       </p>
     </div>
 
-    <!-- LOADING -->
+    <!-- LOADING STATE -->
     <div
       v-if="statusPending && !status"
       class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm"
@@ -216,7 +217,7 @@ onBeforeUnmount(() => {
       </p>
     </div>
 
-    <!-- ERROR -->
+    <!-- ERROR STATE -->
     <div
       v-else-if="statusError && !status"
       class="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700"
@@ -235,24 +236,37 @@ onBeforeUnmount(() => {
         <!-- WATER LEVEL -->
         <div>
           <p class="text-sm font-medium text-slate-500">
-            Current Water Level
+            {{ isOffline ? 'Last Recorded Water Level' : 'Current Water Level' }}
           </p>
 
-          <div class="mt-3 flex items-baseline gap-2">
-            <span class="text-5xl font-bold text-slate-900 md:text-6xl">
-              {{ status.water_level_cm ?? '--' }}
+          <!-- Show reading only when data exists -->
+          <div v-if="hasData" class="mt-3 flex items-baseline gap-2">
+            <span
+              class="text-5xl font-bold md:text-6xl"
+              :class="isOffline ? 'text-slate-500' : 'text-slate-900'"
+            >
+              {{ status.water_level_ft ?? '--' }}
             </span>
 
             <span class="text-xl text-slate-500">
-              cm
+              ft
             </span>
           </div>
 
-          <p class="mt-2 text-sm text-slate-500">
-            {{ status.water_level_ft !== null
-              ? `${status.water_level_ft} ft`
-              : 'No reading available'
-            }}
+          <!-- No data yet -->
+          <p
+            v-else
+            class="mt-3 text-lg font-semibold text-slate-400"
+          >
+            No data yet
+          </p>
+
+          <!-- Stale reading indicator -->
+          <p
+            v-if="isOffline && hasData"
+            class="mt-2 text-xs font-medium text-amber-700"
+          >
+            Previous reading — not live
           </p>
         </div>
 
@@ -290,9 +304,9 @@ onBeforeUnmount(() => {
           Sensor:
           <span
             class="font-bold"
-            :class="isOffline ? 'text-red-700' : 'text-green-700'"
+            :class="status.sensor_online ? 'text-green-700' : 'text-red-700'"
           >
-            {{ isOffline ? 'Offline' : 'Online' }}
+            {{ status.sensor_online ? 'Online' : 'Offline' }}
           </span>
         </p>
 
@@ -300,22 +314,22 @@ onBeforeUnmount(() => {
 
       <!-- OFFLINE WARNING -->
       <div
-        v-if="isOffline && hasData"
+        v-if="isOffline"
         class="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
       >
         No recent sensor data is available. The displayed reading may be outdated.
         Please check the last update time.
       </div>
 
-      <!-- NO READING WARNING -->
+      <!-- NO DATA WARNING -->
       <div
-        v-else-if="!hasData"
-        class="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+        v-if="!hasData"
+        class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600"
       >
         No water-level readings have been recorded yet.
       </div>
 
-      <!-- REFRESH ERROR WITH EXISTING DATA -->
+      <!-- REFRESH ERROR -->
       <p
         v-if="statusError && status"
         class="mt-4 text-sm text-red-600"
@@ -327,6 +341,7 @@ onBeforeUnmount(() => {
 
   </div>
 </section>
+
 
 
     <!-- WATER LEVEL HISTORY -->
