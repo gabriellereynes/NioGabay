@@ -30,7 +30,6 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     supabaseServiceRoleKey: '',
-    mockAuthEnabled: process.env.NUXT_MOCK_AUTH !== 'false',
     public: {
       supabaseUrl: '',
       supabasePublishableKey: '',

@@ -6,7 +6,6 @@
 // cookie to expire.
 import type { H3Event } from 'h3'
 import type { Me, Role } from '../../shared/types/api'
-import { findMockAccountById } from './mockAuth'
  
 /** The logged-in person for this request, or null (not logged in, or account deactivated). */
 export const getCurrentUser = async (event: H3Event): Promise<Me | null> => {
@@ -18,13 +17,6 @@ export const getCurrentUser = async (event: H3Event): Promise<Me | null> => {
   if (!id) {
     event.context.me = null
     return null
-  }
-
-  const config = useRuntimeConfig()
-  if (config.mockAuthEnabled) {
-    const account = findMockAccountById(id)
-    event.context.me = account?.user ?? null
-    return event.context.me
   }
  
   const { data: profile, error } = await serverSupabase()
