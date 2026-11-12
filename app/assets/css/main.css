@@ -95,3 +95,42 @@ textarea { min-height: 70px; resize: vertical; }
 .report-item p { color: #475569; font-size: 13px; margin-top: 7px; line-height: 1.5; }
 @media (max-width: 900px) { .sidebar { width: 210px; flex-basis: 210px; } .metric-grid, .content-grid, .two-column { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .admin-frame { display: block; } .sidebar { width: 100%; padding: 16px; } .brand { padding-bottom: 18px; } .sidebar-footer { margin-top: 18px; } .nav-list { grid-template-columns: repeat(3, 1fr); } .nav-link { text-align: center; font-size: 12px; } .topbar { align-items: flex-start; flex-direction: column; padding: 20px; } .page-content { padding: 20px 16px 40px; } .panel, .metric-card { padding: 18px; } }
+
+/* logout button test */
+.profile-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profile-details > div:last-child {
+  min-width: 0;
+}
+
+.profile-details strong,
+.profile-details small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-wrapper button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logout-wrapper button:hover {
+  background: #b91c1c;
+}
+
+.logout-wrapper button:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}

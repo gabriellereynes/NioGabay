@@ -18,7 +18,17 @@ const links = [
       <nav class="nav-list" aria-label="Staff dashboard">
         <NuxtLink v-for="link in links" :key="link.to" :to="link.to" class="nav-link" :class="{ active: route.path === link.to }">{{ link.label }}</NuxtLink>
       </nav>
-      <div class="sidebar-footer"><div class="avatar">{{ me.full_name.charAt(0) }}</div><div><strong>{{ me.full_name }}</strong><small>{{ me.position_title }}</small></div></div>
+      <div class="sidebar-footer">
+  <div class="profile-details">
+    <div class="avatar">{{ me.full_name.charAt(0) }}</div>
+    <div>
+      <strong>{{ me.full_name }}</strong>
+      <small>{{ me.position_title }}</small>
+    </div>
+  </div>
+
+  <LogoutButton />
+</div>
     </aside>
     <main class="admin-main">
       <header class="topbar"><div><span class="eyebrow">BARANGAY NIOG · BACOOR, CAVITE</span><h1>{{ links.find(link => link.to === route.path)?.label ?? 'Staff dashboard' }}</h1></div><div class="connection"><span class="status-dot"></span> Mock data mode</div></header>

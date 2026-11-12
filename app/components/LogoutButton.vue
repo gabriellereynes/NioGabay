@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Swal from 'sweetalert2'
 // A "Log out" button. Place <LogoutButton /> anywhere (e.g., in Navbar.vue or headers).
 const { logout } = useAuth()
 
@@ -6,10 +7,24 @@ const busy = ref(false)
 const error = ref('')
 
 const submit = async () => {
+  const result = await Swal.fire({
+    title: 'Are you sure you want to log out?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Log out',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#64748b',
+    reverseButtons: true
+  })
+
+  if (!result.isConfirmed) return
+
   busy.value = true
   error.value = ''
+
   try {
-    await logout() // Calls POST /api/auth/logout, clears cookie & resets me.value
+    await logout()
     await navigateTo('/login')
   } catch {
     error.value = 'Could not log out. Check your connection and try again.'
@@ -17,6 +32,7 @@ const submit = async () => {
     busy.value = false
   }
 }
+
 </script>
 
 <template>
@@ -33,6 +49,7 @@ const submit = async () => {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  margin-left: auto;
 }
 .error {
   color: #b00020;

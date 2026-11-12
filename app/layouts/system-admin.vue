@@ -24,9 +24,16 @@ const links = [
         </NuxtLink>
       </nav>
       <div class="sidebar-footer">
-        <div class="avatar">{{ me.full_name.charAt(0) }}</div>
-        <div><strong>{{ me.full_name }}</strong><small>{{ me.position_title }}</small></div>
-      </div>
+  <div class="profile-details">
+    <div class="avatar">{{ me.full_name.charAt(0) }}</div>
+    <div>
+      <strong>{{ me.full_name }}</strong>
+      <small>{{ me.position_title }}</small>
+    </div>
+  </div>
+
+  <LogoutButton />
+</div>
     </aside>
     <main class="admin-main">
       <header class="topbar">
