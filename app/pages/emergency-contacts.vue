@@ -10,36 +10,36 @@ useHead({
   ]
 })
 
-// TEMPORARY MOCK DATA
-// Will be replaced with GET /api/public/emergency-contacts
+// TEMPORARY MOCK DATA??
+// Will be replaced with GET /api/public/emergency-contacts??
 
 const emergencyContacts = [
   {
     id: 1,
     name: 'Barangay Niog Office',
     category: 'Barangay',
-    number: '0951 775 5230\n(046) 423 - 5419' //Replace with verified number
+    number: '0951 775 5230\n(046) 423 - 5419' 
   },
 
   {
     id: 2,
     name: 'Barangay PNP',
     category: 'Barangay',
-    number: '0977 752 0819\n0998 598 5593\n(046) 416 - 7510' //Replace with verified number
+    number: '0977 752 0819\n0998 598 5593\n(046) 416 - 7510' 
   },
 
   {
     id: 3,
     name: 'BDRRMO',
     category: 'Barangay',
-    number: '161 / (046) 417 - 0727' //Replace with verified number
+    number: '161 / (046) 417 - 0727' 
   },
 
   {
     id: 1,
     name: 'BFP - BACOOR',
     category: 'Barangay',
-    number: '0966 6959 711' //Replace with verified number
+    number: '0966 6959 711' 
   }
 ]
 

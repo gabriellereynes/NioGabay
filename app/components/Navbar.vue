@@ -43,9 +43,16 @@ const navLinks = [
 
         <NuxtLink
           to="/subscribe"
-          class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold !text-white shadow-sm transition hover:bg-blue-800"
+          class="rounded-lg border border-blue-700 px-5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
         >
           Subscribe to SMS Alerts
+        </NuxtLink>
+
+        <NuxtLink
+          to="/login"
+          class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+        >
+          Login
         </NuxtLink>
 
         <!-- AUTHENTICATED USER MENU (DESKTOP) -->

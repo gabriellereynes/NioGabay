@@ -10,9 +10,11 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@lucide/vue": "^1.72.0",
     "@supabase/supabase-js": "^2.119.0",
     "@tailwindcss/vite": "^4.3.5",
     "daisyui": "^5.7.50",
+    "echarts": "^6.1.0",
     "nuxt": "^4.6.4",
     "nuxt-auth-utils": "^0.6.2",
     "sweetalert2": "^11.26.25",
