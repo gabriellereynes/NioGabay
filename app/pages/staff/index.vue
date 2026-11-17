@@ -7,7 +7,13 @@ definePageMeta({ layout: 'staff', middleware: 'staff', allowedRoles: ['staff', '
 const backend = useBackend()
 const { status, isOffline, hasData, lastUpdated, errorMessage: statusError, pending: statusPending } = useFloodStatus({ staff: true })
 const range = ref<ReadingRange>('24h')
-const readings = ref(await backend.getReadings(range.value))
+const {
+  chartPoints,
+  hasPoints,
+  peak,
+  errorMessage: readingsError,
+  pending: readingsPending
+} = useReadings({ staff: true, range })
 const alerts = ref(await backend.getAlerts())
 const errorMessage = ref('')
 const ranges: ReadingRange[] = ['24h', '7d', '30d', '90d']
@@ -16,7 +22,6 @@ const refreshAlerts = async () => {
   try { alerts.value = await backend.getAlerts(); errorMessage.value = '' }
   catch (error: any) { errorMessage.value = error?.data?.statusMessage ?? error?.statusMessage ?? 'Unable to load dashboard data.' }
 }
-const changeRange = async () => { readings.value = await backend.getReadings(range.value) }
 const acknowledge = async (id: number) => {
   const result = await Swal.fire({
     title: 'Acknowledge alert?',
@@ -63,7 +68,26 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
       <article class="metric-card"><span class="eyebrow">UNACKNOWLEDGED ALERTS</span><div class="metric-value">{{ status.unacknowledged_alerts }}</div><p>Review alerts below</p></article>
     </div>
     <div class="content-grid">
-      <article class="panel chart-panel"><div class="panel-heading"><div><span class="eyebrow">WATER LEVEL HISTORY</span><h2>Peak readings over time</h2></div><select v-model="range" @change="changeRange"><option v-for="item in ranges" :key="item">{{ item }}</option></select></div><LevelChart :readings="readings" :levels="status.levels" /><div class="chart-legend"><span>Water level</span><span v-for="level in status.levels" :key="level.id">{{ level.label }} · {{ level.level_ft }} ft</span></div></article>
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <div><span class="eyebrow">WATER LEVEL HISTORY</span><h2>Peak readings over time</h2></div>
+          <select v-model="range">
+            <option v-for="item in ranges" :key="item" :value="item">{{ item }}</option>
+          </select>
+        </div>
+        <div v-if="readingsPending && !hasPoints" class="chart-state">Loading readings...</div>
+        <div v-else-if="readingsError && !hasPoints" class="chart-state error-notice">{{ readingsError }}</div>
+        <div v-else-if="!hasPoints" class="chart-state">No readings in this period.</div>
+        <template v-else>
+          <ErrorNotice v-if="readingsError" :message="readingsError" />
+          <LevelChart :chart-points="chartPoints" :levels="status.levels" />
+          <div v-if="peak !== null" class="chart-summary">Peak: {{ (peak / 30.48).toFixed(2) }} ft ({{ peak.toFixed(1) }} cm)</div>
+          <div class="chart-legend"><span>Water level</span><span v-for="level in status.levels" :key="level.id" class="legend-item">
+  <span :class="`legend-${level.code}`">{{ level.label }}</span>
+  · {{ level.level_ft }} ft
+</span></div>
+        </template>
+      </article>
       <article class="panel"><div class="panel-heading"><div><span class="eyebrow">ALERT LEVELS</span><h2>Threshold guide</h2></div></div><div class="level-list"><div v-for="level in status.levels" :key="level.id" class="level-row"><span class="level-dot" :class="`level-${level.code}`"></span><div><strong>{{ level.label }}</strong><small>{{ level.description }}</small></div><b>{{ level.level_ft }} ft</b></div></div></article>
     </div>
     </template>
