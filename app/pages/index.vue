@@ -20,6 +20,36 @@ const {
   lastUpdated
 } = useFloodStatus()
 
+
+// LATEST ANNOUNCEMENTS
+const {
+  announcements,
+  pending: announcementsPending,
+  errorMessage: announcementsError
+} = useAnnouncements()
+
+// FORMAT ANNOUNCEMENT DATE IN PHILIPPINE TIME
+const formatAnnouncementDate = (timestamp: string | null | undefined) => {
+  if (!timestamp) return 'Date unavailable'
+
+  return new Intl.DateTimeFormat('en-PH', {
+    dateStyle: 'long',
+    timeZone: 'Asia/Manila'
+  }).format(new Date(timestamp))
+}
+
+// CONVERT CATEGORY INTO A READABLE LABEL
+const getAnnouncementCategory = (category: string) => {
+  const categories: Record<string, string> = {
+    flood: 'Flood',
+    evacuation: 'Evacuation',
+    advisory: 'Advisory',
+    general: 'General'
+  }
+
+  return categories[category] ?? 'General'
+}
+
 const getAlertClass = (level: string) => {
   const classes: Record<string, string> = {
     normal: 'bg-green-100 text-green-800',
@@ -32,15 +62,6 @@ const getAlertClass = (level: string) => {
   return classes[level] ?? 'bg-slate-100 text-slate-700'
 }
 
-const announcements = [
-  {
-    id: 1,
-    title: 'Flood Monitoring System is Now Active',
-    category: 'General',
-    date: 'November 10, 2026',
-    description: 'Residents can now monitor flood conditions and access safety information through NioGabay.'
-  }
-]
 
 
 import type { ECharts } from 'echarts'
@@ -411,60 +432,95 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- LATEST ANNOUNCEMENTS -->
-    <section class="bg-white px-5 py-12 md:px-8">
-      <div class="mx-auto max-w-7xl">
 
-        <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+<!-- LATEST ANNOUNCEMENTS -->
+<section class="bg-white px-5 py-12 md:px-8">
+  <div class="mx-auto max-w-7xl">
 
-          <div>
-            <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">
-              Latest Announcements
-            </h2>
+    <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 
-            <p class="mt-2 text-sm text-slate-500">
-              Important updates and advisories from the barangay.
-            </p>
-          </div>
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">
+          Latest Announcements
+        </h2>
 
-          <NuxtLink
-            to="/announcements"
-            class="font-semibold text-blue-700 hover:text-blue-900 hover:underline"
-          >
-            View All →
-          </NuxtLink>
-
-        </div>
-
-        <div class="mt-7 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-
-          <article
-            v-for="announcement in announcements"
-            :key="announcement.id"
-            class="rounded-xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:shadow-md"
-          >
-
-            <span class="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-              {{ announcement.category }}
-            </span>
-
-            <h3 class="mt-4 text-lg font-bold text-slate-900">
-              {{ announcement.title }}
-            </h3>
-
-            <p class="mt-2 text-xs text-slate-400">
-              {{ announcement.date }}
-            </p>
-
-            <p class="mt-4 text-sm leading-relaxed text-slate-600">
-              {{ announcement.description }}
-            </p>
-
-          </article>
-
-        </div>
+        <p class="mt-2 text-sm text-slate-500">
+          Important updates and advisories from the barangay.
+        </p>
       </div>
-    </section>
+
+      <NuxtLink
+        to="/announcements"
+        class="font-semibold text-blue-700 hover:text-blue-900 hover:underline"
+      >
+        View All →
+      </NuxtLink>
+
+    </div>
+
+    <!-- LOADING STATE -->
+    <div
+      v-if="announcementsPending && announcements.length === 0"
+      class="mt-7 rounded-xl border border-slate-200 bg-slate-50 p-8 text-center"
+    >
+      <p class="text-sm text-slate-500">
+        Loading announcements...
+      </p>
+    </div>
+
+    <!-- ERROR STATE -->
+    <div
+      v-else-if="announcementsError && announcements.length === 0"
+      class="mt-7 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700"
+    >
+      Unable to load announcements: {{ announcementsError }}
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div
+      v-else-if="announcements.length === 0"
+      class="mt-7 rounded-xl border border-slate-200 bg-slate-50 p-8 text-center"
+    >
+      <p class="text-sm text-slate-500">
+        No announcements yet
+      </p>
+    </div>
+
+    <!-- ANNOUNCEMENT CARDS -->
+    <div
+      v-else
+      class="mt-7 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"
+    >
+
+      <article
+        v-for="announcement in announcements"
+        :key="announcement.id"
+        class="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:shadow-md"
+      >
+
+        <span class="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+          {{ getAnnouncementCategory(announcement.category) }}
+        </span>
+
+        <h3 class="mt-4 break-words text-lg font-bold text-slate-900">
+          {{ announcement.title }}
+        </h3>
+
+        <p class="mt-2 text-xs text-slate-400">
+          {{ formatAnnouncementDate(announcement.published_at) }}
+        </p>
+
+        <p class="mt-4 line-clamp-3 break-words text-sm leading-relaxed text-slate-600">
+          {{ announcement.body }}
+        </p>
+
+      </article>
+
+    </div>
+
+  </div>
+</section>
+
 
     <!-- QUICK LINKS -->
     <section class="px-5 py-12 md:px-8">
