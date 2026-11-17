@@ -63,12 +63,14 @@ h2 { font-size: 20px; margin-top: 6px; }
 .draft-note { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
 .error-notice { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 .chart-wrap { height: 265px; position: relative; border-bottom: 1px solid var(--dashboard-line); border-left: 1px solid var(--dashboard-line); padding: 12px 10px 0; overflow: hidden; }
+.chart-state { min-height: 265px; display: grid; place-items: center; padding: 24px; color: var(--dashboard-muted); text-align: center; }
+.chart-summary { margin-top: 12px; color: var(--dashboard-blue); font-size: 12px; font-weight: 700; }
 .bars { height: 100%; display: flex; align-items: flex-end; gap: 3px; position: relative; z-index: 1; }
 .bar { flex: 1; min-width: 2px; max-width: 14px; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, #60a5fa, #1d4ed8); }
 .threshold { position: absolute; left: 0; right: 0; border-top: 1px dashed #cbd5e1; z-index: 2; font-size: 9px; color: #64748b; }
 .threshold span { position: absolute; right: 2px; top: -15px; background: #fff; padding: 1px 3px; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; color: var(--dashboard-muted); font-size: 10px; }
-.chart-legend span:first-child { color: var(--dashboard-blue); font-weight: 700; }
+.chart-legend > span:first-child { color: var(--dashboard-blue); font-weight: 700; }
 .level-list, .alert-list, .report-list { display: grid; gap: 4px; }
 .level-row, .alert-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
 .level-row:last-child, .alert-row:last-child { border-bottom: 0; }
@@ -134,3 +136,17 @@ textarea { min-height: 70px; resize: vertical; }
   cursor: not-allowed;
   opacity: .6;
 }
+
+.chart-legend > span:first-child {
+  color: var(--dashboard-blue);
+  font-weight: 700;
+}
+
+.chart-legend .legend-item {
+  color: #0f172a;
+}
+
+.chart-legend .legend-yellow { color: #ffc400; }
+.chart-legend .legend-evacuation { color: #ff8800; }
+.chart-legend .legend-orange { color: #ff5e00; }
+.chart-legend .legend-red { color: #ff0000; }

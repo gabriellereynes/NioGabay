@@ -1,20 +1,126 @@
 <script setup lang="ts">
-import type { AlertLevel, ReadingsResponse } from '~~/shared/types/api'
+import type { AlertLevel } from '~~/shared/types/api'
 
-const props = defineProps<{ readings: ReadingsResponse; levels: AlertLevel[] }>()
-const max = computed(() => Math.max(...props.levels.map(level => level.level_cm), ...props.readings.points.map(point => point.water_level_cm), 1))
-const barPoints = computed(() => props.readings.points.filter((_, index) => index % Math.max(1, Math.ceil(props.readings.points.length / 48)) === 0))
-const height = (value: number) => `${Math.max(3, (value / max.value) * 100)}%`
-const thresholdPosition = (value: number) => `${100 - (value / max.value) * 100}%`
+import type { ECharts } from 'echarts'
+
+const props = defineProps<{
+  chartPoints: { x: number; y: number }[]
+  levels: AlertLevel[]
+}>()
+
+const chartElement = ref<HTMLDivElement | null>(null)
+let chartInstance: ECharts | null = null
+
+const maxWaterLevel = computed(() => Math.max(
+  ...props.levels.map(level => level.level_cm),
+  ...props.chartPoints.map(point => point.y),
+  1
+))
+
+const formatManila = (timestamp: number) => new Intl.DateTimeFormat('en-PH', {
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZone: 'Asia/Manila'
+}).format(new Date(timestamp))
+
+const updateChart = () => {
+  if (!chartInstance) return
+
+  chartInstance.setOption({
+    yAxis: { max: maxWaterLevel.value },
+    series: [{
+      data: props.chartPoints.map(point => [point.x, point.y])
+    }]
+  })
+}
+
+const resizeChart = () => chartInstance?.resize()
+
+onMounted(async () => {
+  const echarts = await import('echarts')
+  if (!chartElement.value) return
+
+  chartInstance = echarts.init(chartElement.value)
+  chartInstance.setOption({
+    animation: false,
+    tooltip: {
+      trigger: 'axis',
+      valueFormatter: (value: number) => `${value.toFixed(1)} cm (${(value / 30.48).toFixed(2)} ft)`
+    },
+    grid: {
+      left: 58,
+      right: 24,
+      top: 28,
+      bottom: 42,
+      containLabel: true
+    },
+    xAxis: {
+      type: 'time',
+      boundaryGap: false,
+      axisLabel: {
+        hideOverlap: true,
+        formatter: (value: number) => formatManila(value)
+      }
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Water Level (ft)',
+      min: 0,
+      max: maxWaterLevel.value,
+      axisLabel: {
+        formatter: (value: number) => `${(value / 30.48).toFixed(1)} ft`
+      }
+    },
+    series: [{
+      name: 'Water Level',
+      type: 'line',
+      smooth: false,
+      showSymbol: true,
+      symbolSize: 7,
+      data: props.chartPoints.map(point => [point.x, point.y]),
+      lineStyle: {
+        width: 3,
+        color: '#2563EB'
+      },
+      areaStyle: {
+        opacity: 0.12
+      },
+      markLine: {
+        silent: true,
+        symbol: 'none',
+        label: {
+          formatter: (params: { name?: string }) => params.name ?? ''
+        },
+        lineStyle: {
+          type: 'dashed',
+          color: '#94A3B8'
+        },
+        data: props.levels.map(level => ({
+          yAxis: level.level_cm,
+          name: `${level.label} · ${level.level_ft} ft`
+        }))
+      }
+    }]
+  })
+
+  window.addEventListener('resize', resizeChart)
+})
+
+watch(
+  () => [props.chartPoints, props.levels],
+  updateChart,
+  { deep: true }
+)
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resizeChart)
+  chartInstance?.dispose()
+  chartInstance = null
+})
 </script>
 
 <template>
-  <div class="chart-wrap">
-    <div v-for="level in levels" :key="level.id" class="threshold" :style="{ top: thresholdPosition(level.level_cm) }">
-      <span>{{ level.level_ft }} ft</span>
-    </div>
-    <div class="bars">
-      <div v-for="(point, index) in barPoints" :key="`${point.t}-${index}`" class="bar" :style="{ height: height(point.water_level_cm) }" :title="`${(point.water_level_cm / 30.48).toFixed(2)} ft · ${new Date(point.t).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}`"></div>
-    </div>
-  </div>
+  <div ref="chartElement" class="chart-wrap"></div>
 </template>
