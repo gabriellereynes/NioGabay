@@ -1,7 +1,5 @@
 
-<script setup>
-import { ref, computed } from 'vue'
-
+<script setup lang="ts">
 useHead({
   title: 'Announcements | NioGabay',
   meta: [
@@ -12,19 +10,14 @@ useHead({
   ]
 })
 
-// TEMPORARY MOCK DATA
-// Will be replaced with GET /api/public/announcements?limit=10
+// FETCH ALL PUBLISHED ANNOUNCEMENTS
+const {
+  announcements,
+  pending,
+  errorMessage
+} = useAnnouncements()
 
-const announcements = [
-  {
-    id: 1,
-    title: 'Flood Monitoring System is Now Active',
-    category: 'General',
-    date: 'November 10, 2026',
-    description: 'Residents can now access NioGabay to monitor flood conditions and view important community safety information.'
-  }
-]
-
+// CATEGORY FILTERS
 const categories = [
   'All',
   'Flood',
@@ -35,25 +28,52 @@ const categories = [
 
 const selectedCategory = ref('All')
 
-const filteredAnnouncements = computed(() => {
-  if (selectedCategory.value === 'All') {
-    return announcements
+// CATEGORY LABELS
+const getAnnouncementCategory = (category: string) => {
+  const categoryLabels: Record<string, string> = {
+    flood: 'Flood',
+    evacuation: 'Evacuation',
+    advisory: 'Advisory',
+    general: 'General'
   }
 
-  return announcements.filter(
-    announcement => announcement.category === selectedCategory.value
-  )
-})
+  return categoryLabels[category.toLowerCase()] ?? 'General'
+}
 
-function categoryStyle(category) {
-  const styles = {
+// CATEGORY COLORS
+function categoryStyle(category: string) {
+  const styles: Record<string, string> = {
     Flood: 'bg-red-100 text-red-800',
     Evacuation: 'bg-amber-100 text-amber-800',
     Advisory: 'bg-blue-100 text-blue-800',
     General: 'bg-slate-100 text-slate-700'
   }
 
-  return styles[category] || 'bg-slate-100 text-slate-700'
+  return styles[category] ?? 'bg-slate-100 text-slate-700'
+}
+
+// FILTER ANNOUNCEMENTS
+const filteredAnnouncements = computed(() => {
+  if (selectedCategory.value === 'All') {
+    return announcements.value
+  }
+
+  return announcements.value.filter(
+    announcement =>
+      getAnnouncementCategory(announcement.category) === selectedCategory.value
+  )
+})
+
+// FORMAT ANNOUNCEMENT DATE
+const formatAnnouncementDate = (
+  timestamp: string | null | undefined
+) => {
+  if (!timestamp) return 'Date unavailable'
+
+  return new Intl.DateTimeFormat('en-PH', {
+    dateStyle: 'long',
+    timeZone: 'Asia/Manila'
+  }).format(new Date(timestamp))
 }
 </script>
 
@@ -97,7 +117,6 @@ function categoryStyle(category) {
 
         <!-- CATEGORY FILTERS -->
         <div class="mb-8 flex flex-wrap gap-3">
-
           <button
             v-for="category in categories"
             :key="category"
@@ -110,46 +129,70 @@ function categoryStyle(category) {
           >
             {{ category }}
           </button>
-
         </div>
 
-        <!-- ANNOUNCEMENT LIST -->
+        <!-- LOADING STATE -->
         <div
-          v-if="filteredAnnouncements.length > 0"
+          v-if="pending && announcements.length === 0"
+          class="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center"
+        >
+          <p class="text-sm text-slate-500">
+            Loading announcements...
+          </p>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div
+          v-else-if="errorMessage && announcements.length === 0"
+          class="rounded-2xl border border-red-200 bg-red-50 px-6 py-10 text-center"
+        >
+          <h3 class="text-lg font-bold text-red-800">
+            Unable to load announcements
+          </h3>
+
+          <p class="mt-2 text-sm text-red-700">
+            {{ errorMessage }}
+          </p>
+        </div>
+
+        <!-- ANNOUNCEMENT CARDS -->
+        <div
+          v-else-if="filteredAnnouncements.length > 0"
           class="grid grid-cols-1 gap-5 md:grid-cols-2"
         >
-
           <article
             v-for="announcement in filteredAnnouncements"
             :key="announcement.id"
             class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md md:p-7"
           >
 
+            <!-- CATEGORY TAG AND DATE -->
             <div class="flex flex-wrap items-center justify-between gap-3">
 
               <span
                 class="rounded-full px-3 py-1 text-xs font-bold"
-                :class="categoryStyle(announcement.category)"
+                :class="categoryStyle(getAnnouncementCategory(announcement.category))"
               >
-                {{ announcement.category }}
+                {{ getAnnouncementCategory(announcement.category) }}
               </span>
 
               <span class="text-xs text-slate-400">
-                {{ announcement.date }}
+                {{ formatAnnouncementDate(announcement.published_at) }}
               </span>
 
             </div>
 
-            <h3 class="mt-5 text-xl font-bold leading-snug text-slate-900">
+            <!-- TITLE -->
+            <h3 class="mt-5 break-words text-xl font-bold leading-snug text-slate-900">
               {{ announcement.title }}
             </h3>
 
-            <p class="mt-3 text-sm leading-relaxed text-slate-600">
-              {{ announcement.description }}
+            <!-- DESCRIPTION -->
+            <p class="mt-3 break-words text-sm leading-relaxed text-slate-600">
+              {{ announcement.body }}
             </p>
 
           </article>
-
         </div>
 
         <!-- EMPTY STATE -->

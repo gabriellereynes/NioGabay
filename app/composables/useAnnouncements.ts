@@ -2,18 +2,21 @@
 import { computed } from 'vue'
 import type { PublicAnnouncement } from '~~/shared/types/api'
 
-// Fetch the latest 3 published announcements for the public homepage.
-export function useAnnouncements() {
+// Fetch published announcements with an optional result limit.
+export function useAnnouncements(limit?: number) {
   const { data, error, pending } = useFetch<PublicAnnouncement[]>(
-    '/api/public/announcements?limit=3'
+    '/api/public/announcements',
+    {
+      query: limit ? { limit } : {}
+    }
   )
 
-  /** The list of announcements, or an empty array when no data is available. */
+  // Announcements list
   const announcements = computed<PublicAnnouncement[]>(
     () => data.value ?? []
   )
 
-  /** A message you can show the user, or null when everything is fine. */
+  // Error message
   const errorMessage = computed<string | null>(() => {
     const e = error.value as {
       statusMessage?: string
@@ -25,5 +28,9 @@ export function useAnnouncements() {
       : null
   })
 
-  return { announcements, pending, errorMessage }
+  return {
+    announcements,
+    pending,
+    errorMessage
+  }
 }
