@@ -63,15 +63,22 @@ h2 { font-size: 20px; margin-top: 6px; }
 .draft-note { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
 .error-notice { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 .chart-wrap { height: 265px; position: relative; border-bottom: 1px solid var(--dashboard-line); border-left: 1px solid var(--dashboard-line); padding: 12px 10px 0; overflow: hidden; }
+.chart-state { min-height: 265px; display: grid; place-items: center; padding: 24px; color: var(--dashboard-muted); text-align: center; }
+.chart-summary { margin-top: 12px; color: var(--dashboard-blue); font-size: 12px; font-weight: 700; }
 .bars { height: 100%; display: flex; align-items: flex-end; gap: 3px; position: relative; z-index: 1; }
 .bar { flex: 1; min-width: 2px; max-width: 14px; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, #60a5fa, #1d4ed8); }
 .threshold { position: absolute; left: 0; right: 0; border-top: 1px dashed #cbd5e1; z-index: 2; font-size: 9px; color: #64748b; }
 .threshold span { position: absolute; right: 2px; top: -15px; background: #fff; padding: 1px 3px; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; color: var(--dashboard-muted); font-size: 10px; }
-.chart-legend span:first-child { color: var(--dashboard-blue); font-weight: 700; }
+.chart-legend > span:first-child { color: var(--dashboard-blue); font-weight: 700; }
 .level-list, .alert-list, .report-list { display: grid; gap: 4px; }
 .level-row, .alert-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
 .level-row:last-child, .alert-row:last-child { border-bottom: 0; }
+.alert-state { padding: 24px 0; color: var(--dashboard-muted); font-size: 13px; text-align: center; }
+.alert-pagination { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 18px; color: var(--dashboard-muted); font-size: 12px; }
+.alert-pagination label { display: flex; align-items: center; gap: 8px; }
+.alert-pagination select { width: auto; padding: 6px 8px; }
+.alert-pagination > div { display: flex; gap: 8px; }
 .level-row div, .alert-copy { flex: 1; min-width: 0; }
 .level-row strong, .alert-copy strong { font-size: 13px; display: block; }
 .level-row small, .alert-copy small, .report-item small, table small { display: block; color: var(--dashboard-muted); font-size: 11px; margin-top: 4px; }
@@ -94,7 +101,7 @@ textarea { min-height: 70px; resize: vertical; }
 .report-item { padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
 .report-item p { color: #475569; font-size: 13px; margin-top: 7px; line-height: 1.5; }
 @media (max-width: 900px) { .sidebar { width: 210px; flex-basis: 210px; } .metric-grid, .content-grid, .two-column { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .admin-frame { display: block; } .sidebar { width: 100%; padding: 16px; } .brand { padding-bottom: 18px; } .sidebar-footer { margin-top: 18px; } .nav-list { grid-template-columns: repeat(3, 1fr); } .nav-link { text-align: center; font-size: 12px; } .topbar { align-items: flex-start; flex-direction: column; padding: 20px; } .page-content { padding: 20px 16px 40px; } .panel, .metric-card { padding: 18px; } }
+@media (max-width: 640px) { .admin-frame { display: block; } .sidebar { width: 100%; padding: 16px; } .brand { padding-bottom: 18px; } .sidebar-footer { margin-top: 18px; } .nav-list { grid-template-columns: repeat(3, 1fr); } .nav-link { text-align: center; font-size: 12px; } .topbar { align-items: flex-start; flex-direction: column; padding: 20px; } .page-content { padding: 20px 16px 40px; } .panel, .metric-card { padding: 18px; } .alert-pagination { align-items: stretch; flex-direction: column; } .alert-row { align-items: flex-start; flex-wrap: wrap; } }
 
 /* logout button test */
 .profile-details {
@@ -134,3 +141,17 @@ textarea { min-height: 70px; resize: vertical; }
   cursor: not-allowed;
   opacity: .6;
 }
+
+.chart-legend > span:first-child {
+  color: var(--dashboard-blue);
+  font-weight: 700;
+}
+
+.chart-legend .legend-item {
+  color: #0f172a;
+}
+
+.chart-legend .legend-yellow { color: #ffc400; }
+.chart-legend .legend-evacuation { color: #ff8800; }
+.chart-legend .legend-orange { color: #ff5e00; }
+.chart-legend .legend-red { color: #ff0000; }
