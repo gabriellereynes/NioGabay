@@ -20,6 +20,53 @@ const {
   lastUpdated
 } = useFloodStatus()
 
+
+// LATEST ANNOUNCEMENTS
+const {
+  announcements,
+  pending: announcementsPending,
+  errorMessage: announcementsError
+} = useAnnouncements(3)
+
+
+// FORMAT ANNOUNCEMENT DATE IN PHILIPPINE TIME
+const formatAnnouncementDate = (timestamp: string | null | undefined) => {
+  if (!timestamp) return 'Date unavailable'
+
+  return new Intl.DateTimeFormat('en-PH', {
+    dateStyle: 'long',
+    timeZone: 'Asia/Manila'
+  }).format(new Date(timestamp))
+}
+
+
+// CONVERT CATEGORY INTO A READABLE LABEL
+const getAnnouncementCategory = (category: string) => {
+  const categories: Record<string, string> = {
+    flood: 'Flood',
+    evacuation: 'Evacuation',
+    advisory: 'Advisory',
+    general: 'General'
+  }
+
+  return categories[category.toLowerCase()] ?? 'General'
+}
+
+
+// ANNOUNCEMENT CATEGORY COLORS
+const getAnnouncementCategoryStyle = (category: string) => {
+  const styles: Record<string, string> = {
+    Flood: 'bg-red-100 text-red-800',
+    Evacuation: 'bg-amber-100 text-amber-800',
+    Advisory: 'bg-blue-100 text-blue-800',
+    General: 'bg-slate-100 text-slate-700'
+  }
+
+  return styles[category] ?? 'bg-slate-100 text-slate-700'
+}
+
+
+// FLOOD ALERT COLORS
 const getAlertClass = (level: string) => {
   const classes: Record<string, string> = {
     normal: 'bg-green-100 text-green-800',
@@ -32,16 +79,6 @@ const getAlertClass = (level: string) => {
   return classes[level] ?? 'bg-slate-100 text-slate-700'
 }
 
-const announcements = [
-  {
-    id: 1,
-    title: 'Flood Monitoring System is Now Active',
-    category: 'General',
-    date: 'November 10, 2026',
-    description: 'Residents can now monitor flood conditions and access safety information through NioGabay.'
-  }
-]
-
 
 import type { ECharts } from 'echarts'
 
@@ -49,7 +86,8 @@ const chartElement = ref<HTMLDivElement | null>(null)
 
 let chartInstance: ECharts | null = null
 
-// Get actual readings from the public API
+
+// GET ACTUAL READINGS FROM THE PUBLIC API
 const {
   chartPoints,
   hasPoints,
@@ -58,13 +96,15 @@ const {
   peak
 } = useReadings()
 
-// DEBUG: Check the readings received from the API
+
+// DEBUG: CHECK THE READINGS RECEIVED FROM THE API
 watch(chartPoints, (points) => {
   console.log('Chart points:', points)
   console.log('Number of readings:', points.length)
 }, { immediate: true })
 
-// Update the ECharts line chart
+
+// UPDATE THE ECHARTS LINE CHART
 const updateChart = () => {
   if (!chartInstance) return
 
@@ -80,7 +120,14 @@ const updateChart = () => {
   })
 }
 
-// Initialize ECharts when the page loads
+
+// RESIZE THE CHART WHEN THE BROWSER WINDOW CHANGES
+const resizeChart = () => {
+  chartInstance?.resize()
+}
+
+
+// INITIALIZE ECHARTS WHEN THE PAGE LOADS
 onMounted(async () => {
   const echarts = await import('echarts')
 
@@ -144,15 +191,12 @@ onMounted(async () => {
   window.addEventListener('resize', resizeChart)
 })
 
-// Watch for new readings from the API
+
+// WATCH FOR NEW READINGS FROM THE API
 watch(chartPoints, updateChart, { deep: true })
 
-// Resize the chart when the browser window changes
-const resizeChart = () => {
-  chartInstance?.resize()
-}
 
-// Clean up when leaving the page
+// CLEAN UP WHEN LEAVING THE PAGE
 onBeforeUnmount(() => {
   window.removeEventListener('resize', resizeChart)
   chartInstance?.dispose()
@@ -193,155 +237,153 @@ onBeforeUnmount(() => {
     </section>
 
 
+    <!-- CURRENT FLOOD STATUS -->
+    <section class="px-5 py-12 md:px-8">
+      <div class="mx-auto max-w-7xl">
 
-<!-- CURRENT FLOOD STATUS -->
-<section class="px-5 py-12 md:px-8">
-  <div class="mx-auto max-w-7xl">
-
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">
-        Current Flood Status
-      </h2>
-      <p class="mt-2 text-sm text-slate-500">
-        Latest available water-level information.
-      </p>
-    </div>
-
-    <!-- LOADING STATE -->
-    <div
-      v-if="statusPending && !status"
-      class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm"
-    >
-      <p class="text-sm text-slate-500">
-        Loading current flood status...
-      </p>
-    </div>
-
-    <!-- ERROR STATE -->
-    <div
-      v-else-if="statusError && !status"
-      class="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700"
-    >
-      Unable to load the current flood status: {{ statusError }}
-    </div>
-
-    <!-- FLOOD STATUS DATA -->
-    <div
-      v-else-if="status"
-      class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
-    >
-
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-
-        <!-- WATER LEVEL -->
-        <div>
-          <p class="text-sm font-medium text-slate-500">
-            {{ isOffline ? 'Last Recorded Water Level' : 'Current Water Level' }}
-          </p>
-
-          <!-- Show reading only when data exists -->
-          <div v-if="hasData" class="mt-3 flex items-baseline gap-2">
-            <span
-              class="text-5xl font-bold md:text-6xl"
-              :class="isOffline ? 'text-slate-500' : 'text-slate-900'"
-            >
-              {{ status.water_level_ft ?? '--' }}
-            </span>
-
-            <span class="text-xl text-slate-500">
-              ft
-            </span>
-          </div>
-
-          <!-- No data yet -->
-          <p
-            v-else
-            class="mt-3 text-lg font-semibold text-slate-400"
-          >
-            No data yet
-          </p>
-
-          <!-- Stale reading indicator -->
-          <p
-            v-if="isOffline && hasData"
-            class="mt-2 text-xs font-medium text-amber-700"
-          >
-            Previous reading — not live
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">
+            Current Flood Status
+          </h2>
+          <p class="mt-2 text-sm text-slate-500">
+            Latest available water-level information.
           </p>
         </div>
 
-        <!-- ALERT STATUS -->
-        <div>
-          <p class="text-sm font-medium text-slate-500">
-            Alert Status
+        <!-- LOADING STATE -->
+        <div
+          v-if="statusPending && !status"
+          class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm"
+        >
+          <p class="text-sm text-slate-500">
+            Loading current flood status...
+          </p>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div
+          v-else-if="statusError && !status"
+          class="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700"
+        >
+          Unable to load the current flood status: {{ statusError }}
+        </div>
+
+        <!-- FLOOD STATUS DATA -->
+        <div
+          v-else-if="status"
+          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8"
+        >
+
+          <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+
+            <!-- WATER LEVEL -->
+            <div>
+              <p class="text-sm font-medium text-slate-500">
+                {{ isOffline ? 'Last Recorded Water Level' : 'Current Water Level' }}
+              </p>
+
+              <!-- SHOW READING ONLY WHEN DATA EXISTS -->
+              <div v-if="hasData" class="mt-3 flex items-baseline gap-2">
+                <span
+                  class="text-5xl font-bold md:text-6xl"
+                  :class="isOffline ? 'text-slate-500' : 'text-slate-900'"
+                >
+                  {{ status.water_level_ft ?? '--' }}
+                </span>
+
+                <span class="text-xl text-slate-500">
+                  ft
+                </span>
+              </div>
+
+              <!-- NO DATA YET -->
+              <p
+                v-else
+                class="mt-3 text-lg font-semibold text-slate-400"
+              >
+                No data yet
+              </p>
+
+              <!-- STALE READING INDICATOR -->
+              <p
+                v-if="isOffline && hasData"
+                class="mt-2 text-xs font-medium text-amber-700"
+              >
+                Previous reading — not live
+              </p>
+            </div>
+
+            <!-- ALERT STATUS -->
+            <div>
+              <p class="text-sm font-medium text-slate-500">
+                Alert Status
+              </p>
+
+              <div class="mt-3">
+                <span
+                  class="inline-flex rounded-full px-4 py-2 text-sm font-bold"
+                  :class="getAlertClass(status.alert_level)"
+                >
+                  {{ status.alert_label }}
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- SENSOR INFORMATION -->
+          <div
+            class="mt-8 flex flex-col gap-3 border-t border-slate-100 pt-5 text-sm sm:flex-row sm:items-center sm:justify-between"
+          >
+
+            <p class="text-slate-500">
+              Last updated:
+              <span class="font-medium text-slate-700">
+                {{ lastUpdated }}
+              </span>
+            </p>
+
+            <p class="text-slate-500">
+              Sensor:
+              <span
+                class="font-bold"
+                :class="status.sensor_online ? 'text-green-700' : 'text-red-700'"
+              >
+                {{ status.sensor_online ? 'Online' : 'Offline' }}
+              </span>
+            </p>
+
+          </div>
+
+          <!-- OFFLINE WARNING -->
+          <div
+            v-if="isOffline"
+            class="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+          >
+            No recent sensor data is available. The displayed reading may be outdated.
+            Please check the last update time.
+          </div>
+
+          <!-- NO DATA WARNING -->
+          <div
+            v-if="!hasData"
+            class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600"
+          >
+            No water-level readings have been recorded yet.
+          </div>
+
+          <!-- REFRESH ERROR -->
+          <p
+            v-if="statusError && status"
+            class="mt-4 text-sm text-red-600"
+          >
+            Unable to refresh the latest status. Showing the previously loaded data.
           </p>
 
-          <div class="mt-3">
-            <span
-              class="inline-flex rounded-full px-4 py-2 text-sm font-bold"
-              :class="getAlertClass(status.alert_level)"
-            >
-              {{ status.alert_label }}
-            </span>
-          </div>
         </div>
 
       </div>
-
-      <!-- SENSOR INFORMATION -->
-      <div
-        class="mt-8 flex flex-col gap-3 border-t border-slate-100 pt-5 text-sm sm:flex-row sm:items-center sm:justify-between"
-      >
-
-        <p class="text-slate-500">
-          Last updated:
-          <span class="font-medium text-slate-700">
-            {{ lastUpdated }}
-          </span>
-        </p>
-
-        <p class="text-slate-500">
-          Sensor:
-          <span
-            class="font-bold"
-            :class="status.sensor_online ? 'text-green-700' : 'text-red-700'"
-          >
-            {{ status.sensor_online ? 'Online' : 'Offline' }}
-          </span>
-        </p>
-
-      </div>
-
-      <!-- OFFLINE WARNING -->
-      <div
-        v-if="isOffline"
-        class="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
-      >
-        No recent sensor data is available. The displayed reading may be outdated.
-        Please check the last update time.
-      </div>
-
-      <!-- NO DATA WARNING -->
-      <div
-        v-if="!hasData"
-        class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600"
-      >
-        No water-level readings have been recorded yet.
-      </div>
-
-      <!-- REFRESH ERROR -->
-      <p
-        v-if="statusError && status"
-        class="mt-4 text-sm text-red-600"
-      >
-        Unable to refresh the latest status. Showing the previously loaded data.
-      </p>
-
-    </div>
-
-  </div>
-</section>
-
+    </section>
 
 
     <!-- WATER LEVEL HISTORY -->
@@ -356,60 +398,63 @@ onBeforeUnmount(() => {
           Monitor changes in water level over the past 24 hours.
         </p>
 
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
-<div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">
+                Water Level Trend
+              </h3>
+              <p class="text-sm text-slate-500">
+                Actual sensor readings from the past 24 hours.
+              </p>
+            </div>
 
-  <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <h3 class="text-lg font-bold text-slate-900">
-        Water Level Trend
-      </h3>
-      <p class="text-sm text-slate-500">
-        Actual sensor readings from the past 24 hours.
-      </p>
-    </div>
+            <p v-if="hasPoints" class="text-sm font-semibold text-blue-700">
+              Peak: {{ peak }} cm
+            </p>
+          </div>
 
-    <p v-if="hasPoints" class="text-sm font-semibold text-blue-700">
-      Peak: {{ peak }} cm
-    </p>
-  </div>
+          <div class="relative">
+            <div
+              ref="chartElement"
+              class="h-80 w-full"
+            ></div>
 
-  <div class="relative">
-    <div
-      ref="chartElement"
-      class="h-80 w-full"
-    ></div>
+            <!-- LOADING STATE -->
+            <div
+              v-if="pending && !hasPoints"
+              class="absolute inset-0 flex items-center justify-center bg-white"
+            >
+              <p class="text-sm text-slate-500">
+                Loading water-level readings...
+              </p>
+            </div>
 
-    <div
-      v-if="pending && !hasPoints"
-      class="absolute inset-0 flex items-center justify-center bg-white"
-    >
-      <p class="text-sm text-slate-500">
-        Loading water-level readings...
-      </p>
-    </div>
+            <!-- EMPTY STATE -->
+            <div
+              v-else-if="!hasPoints && !errorMessage"
+              class="absolute inset-0 flex items-center justify-center bg-white"
+            >
+              <p class="text-center text-sm text-slate-400">
+                No readings available for the past 24 hours.
+              </p>
+            </div>
 
-    <div
-      v-else-if="!hasPoints && !errorMessage"
-      class="absolute inset-0 flex items-center justify-center bg-white"
-    >
-      <p class="text-center text-sm text-slate-400">
-        No readings available for the past 24 hours.
-      </p>
-    </div>
+            <!-- ERROR STATE -->
+            <div
+              v-if="errorMessage"
+              class="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700"
+            >
+              {{ errorMessage }}
+            </div>
+          </div>
 
-    <div
-      v-if="errorMessage"
-      class="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700"
-    >
-      {{ errorMessage }}
-    </div>
-  </div>
-
-</div>
+        </div>
 
       </div>
     </section>
+
 
     <!-- LATEST ANNOUNCEMENTS -->
     <section class="bg-white px-5 py-12 md:px-8">
@@ -436,35 +481,78 @@ onBeforeUnmount(() => {
 
         </div>
 
-        <div class="mt-7 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <!-- LOADING STATE -->
+        <div
+          v-if="announcementsPending && announcements.length === 0"
+          class="mt-7 rounded-xl border border-slate-200 bg-slate-50 p-8 text-center"
+        >
+          <p class="text-sm text-slate-500">
+            Loading announcements...
+          </p>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div
+          v-else-if="announcementsError && announcements.length === 0"
+          class="mt-7 rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700"
+        >
+          Unable to load announcements: {{ announcementsError }}
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div
+          v-else-if="announcements.length === 0"
+          class="mt-7 rounded-xl border border-slate-200 bg-slate-50 p-8 text-center"
+        >
+          <p class="text-sm text-slate-500">
+            No announcements yet
+          </p>
+        </div>
+
+        <!-- ANNOUNCEMENT CARDS -->
+        <div
+          v-else
+          class="mt-7 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"
+        >
 
           <article
             v-for="announcement in announcements"
             :key="announcement.id"
-            class="rounded-xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:shadow-md"
+            class="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:shadow-md"
           >
 
-            <span class="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-              {{ announcement.category }}
+            <!-- CATEGORY TAG -->
+            <span
+              class="inline-block rounded-full px-3 py-1 text-xs font-semibold"
+              :class="getAnnouncementCategoryStyle(
+                getAnnouncementCategory(announcement.category)
+              )"
+            >
+              {{ getAnnouncementCategory(announcement.category) }}
             </span>
 
-            <h3 class="mt-4 text-lg font-bold text-slate-900">
+            <!-- ANNOUNCEMENT TITLE -->
+            <h3 class="mt-4 break-words text-lg font-bold text-slate-900">
               {{ announcement.title }}
             </h3>
 
+            <!-- ANNOUNCEMENT DATE -->
             <p class="mt-2 text-xs text-slate-400">
-              {{ announcement.date }}
+              {{ formatAnnouncementDate(announcement.published_at) }}
             </p>
 
-            <p class="mt-4 text-sm leading-relaxed text-slate-600">
-              {{ announcement.description }}
+            <!-- ANNOUNCEMENT BODY -->
+            <p class="mt-4 line-clamp-3 break-words text-sm leading-relaxed text-slate-600">
+              {{ announcement.body }}
             </p>
 
           </article>
 
         </div>
+
       </div>
     </section>
+
 
     <!-- QUICK LINKS -->
     <section class="px-5 py-12 md:px-8">
@@ -517,6 +605,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </section>
+
 
     <!-- SMS SUBSCRIPTION CTA -->
     <section class="px-5 pb-16 md:px-8">
