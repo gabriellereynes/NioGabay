@@ -1,12 +1,12 @@
 // Shared by GET /api/public/status and GET /api/staff/status.
 // Builds the "current flood status" from the database. Server-side only.
 import type { AlertLevel, AlertLevelCode, FloodStatus } from '../../shared/types/api'
- 
+
 const CM_PER_FOOT = 30.48
 export const OFFLINE_AFTER_MINUTES = 5 // no reading for this long = sensor offline
- 
+
 const round1 = (n: number) => Math.round(n * 10) / 10
- 
+
 export interface SensorRow {
   id: string
   name: string
@@ -14,20 +14,20 @@ export interface SensorRow {
   mount_height_cm: number | null
   is_active: boolean
 }
- 
+
 export interface LatestReading {
   id: number
   distance_cm: number
   water_level_cm: number
   recorded_at: string
 }
- 
+
 export interface StatusParts {
   status: FloodStatus
   sensor: SensorRow | null
   latest: LatestReading | null
 }
- 
+
 // Same rule as the sensor endpoint: the highest level the water has reached, or null.
 const pickLevel = (levels: AlertLevel[], cm: number): AlertLevel | null => {
   let found: AlertLevel | null = null
@@ -36,20 +36,18 @@ const pickLevel = (levels: AlertLevel[], cm: number): AlertLevel | null => {
   }
   return found
 }
- 
-/** We have one sensor for now: the oldest active one. */
-export async function loadStatus(): Promise<StatusParts> {
-  const db = serverSupabase()
- 
-  const { data: levelRows, error: levelsError } = await db
+
+/** The four alert thresholds, lowest first. */
+export async function loadAlertLevels(): Promise<AlertLevel[]> {
+  const { data, error } = await serverSupabase()
     .from('alert_levels')
     .select('id, code, label, level_ft, level_cm, description')
     .order('level_cm')
-  if (levelsError) {
-    console.error('status: alert_levels failed', levelsError)
+  if (error) {
+    console.error('alert_levels failed', error)
     throw createError({ statusCode: 500, statusMessage: 'Database error' })
   }
-  const levels: AlertLevel[] = (levelRows ?? []).map((l: any) => ({
+  const levels: AlertLevel[] = (data ?? []).map((l: any) => ({
     id: l.id,
     code: l.code,
     label: l.label,
@@ -58,7 +56,15 @@ export async function loadStatus(): Promise<StatusParts> {
     description: l.description ?? null
   }))
   levels.sort((a, b) => a.level_cm - b.level_cm) // lowest first, as the contract promises
- 
+  return levels
+}
+
+/** We have one sensor for now: the oldest active one. */
+export async function loadStatus(): Promise<StatusParts> {
+  const db = serverSupabase()
+
+  const levels = await loadAlertLevels()
+
   const { data: sensorRow, error: sensorError } = await db
     .from('sensors')
     .select('id, name, location_description, mount_height_cm, is_active')
@@ -79,7 +85,7 @@ export async function loadStatus(): Promise<StatusParts> {
         is_active: sensorRow.is_active
       }
     : null
- 
+
   let latest: LatestReading | null = null
   if (sensor) {
     const { data: row, error: readingError } = await db
@@ -102,7 +108,7 @@ export async function loadStatus(): Promise<StatusParts> {
       }
     }
   }
- 
+
   let status: FloodStatus
   if (!latest) {
     status = {
@@ -127,6 +133,6 @@ export async function loadStatus(): Promise<StatusParts> {
       levels
     }
   }
- 
+
   return { status, sensor, latest }
 }
