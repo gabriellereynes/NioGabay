@@ -74,6 +74,11 @@ h2 { font-size: 20px; margin-top: 6px; }
 .level-list, .alert-list, .report-list { display: grid; gap: 4px; }
 .level-row, .alert-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
 .level-row:last-child, .alert-row:last-child { border-bottom: 0; }
+.alert-state { padding: 24px 0; color: var(--dashboard-muted); font-size: 13px; text-align: center; }
+.alert-pagination { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 18px; color: var(--dashboard-muted); font-size: 12px; }
+.alert-pagination label { display: flex; align-items: center; gap: 8px; }
+.alert-pagination select { width: auto; padding: 6px 8px; }
+.alert-pagination > div { display: flex; gap: 8px; }
 .level-row div, .alert-copy { flex: 1; min-width: 0; }
 .level-row strong, .alert-copy strong { font-size: 13px; display: block; }
 .level-row small, .alert-copy small, .report-item small, table small { display: block; color: var(--dashboard-muted); font-size: 11px; margin-top: 4px; }
@@ -96,7 +101,7 @@ textarea { min-height: 70px; resize: vertical; }
 .report-item { padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
 .report-item p { color: #475569; font-size: 13px; margin-top: 7px; line-height: 1.5; }
 @media (max-width: 900px) { .sidebar { width: 210px; flex-basis: 210px; } .metric-grid, .content-grid, .two-column { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .admin-frame { display: block; } .sidebar { width: 100%; padding: 16px; } .brand { padding-bottom: 18px; } .sidebar-footer { margin-top: 18px; } .nav-list { grid-template-columns: repeat(3, 1fr); } .nav-link { text-align: center; font-size: 12px; } .topbar { align-items: flex-start; flex-direction: column; padding: 20px; } .page-content { padding: 20px 16px 40px; } .panel, .metric-card { padding: 18px; } }
+@media (max-width: 640px) { .admin-frame { display: block; } .sidebar { width: 100%; padding: 16px; } .brand { padding-bottom: 18px; } .sidebar-footer { margin-top: 18px; } .nav-list { grid-template-columns: repeat(3, 1fr); } .nav-link { text-align: center; font-size: 12px; } .topbar { align-items: flex-start; flex-direction: column; padding: 20px; } .page-content { padding: 20px 16px 40px; } .panel, .metric-card { padding: 18px; } .alert-pagination { align-items: stretch; flex-direction: column; } .alert-row { align-items: flex-start; flex-wrap: wrap; } }
 
 /* logout button test */
 .profile-details {
