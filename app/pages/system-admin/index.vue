@@ -4,8 +4,15 @@ import type { ReadingRange } from '~~/shared/types/api'
 
 definePageMeta({ layout: 'system-admin', middleware: 'admin', allowedRoles: ['admin'] })
 
-const backend = useBackend()
-const { status, isOffline, hasData, lastUpdated, errorMessage: statusError, pending: statusPending } = useFloodStatus({ staff: true })
+const {
+  status,
+  isOffline,
+  hasData,
+  lastUpdated,
+  errorMessage: statusError,
+  pending: statusPending,
+  refresh: refreshStatus
+} = useFloodStatus({ staff: true })
 const range = ref<ReadingRange>('24h')
 const {
   chartPoints,
@@ -14,14 +21,22 @@ const {
   errorMessage: readingsError,
   pending: readingsPending
 } = useReadings({ staff: true, range })
-const alerts = ref(await backend.getAlerts())
-const errorMessage = ref('')
+const {
+  items: alerts,
+  total: alertsTotal,
+  limit: alertsLimit,
+  page: alertsPage,
+  totalPages: alertsTotalPages,
+  pending: alertsPending,
+  errorMessage: alertsError,
+  previousPage: previousAlertsPage,
+  nextPage: nextAlertsPage,
+  acknowledge: acknowledgeAlert
+} = useAlerts()
+const alertActionError = ref('')
+const acknowledgingIds = ref<number[]>([])
 const ranges: ReadingRange[] = ['24h', '7d', '30d', '90d']
 
-const refreshAlerts = async () => {
-  try { alerts.value = await backend.getAlerts(); errorMessage.value = '' }
-  catch (error: any) { errorMessage.value = error?.data?.statusMessage ?? error?.statusMessage ?? 'Unable to load dashboard data.' }
-}
 const acknowledge = async (id: number) => {
   const result = await Swal.fire({
     title: 'Acknowledge alert?',
@@ -36,23 +51,24 @@ const acknowledge = async (id: number) => {
 
   if (!result.isConfirmed) return
 
+  acknowledgingIds.value = [...acknowledgingIds.value, id]
+  alertActionError.value = ''
   try {
-    await backend.acknowledgeAlert(id)
-    alerts.value = await backend.getAlerts()
-  } catch (error: any) {
-    errorMessage.value = error?.data?.statusMessage ?? error?.statusMessage ?? 'Unable to acknowledge alert.'
+    await acknowledgeAlert(id)
+    await refreshStatus()
+  } catch (error: unknown) {
+    const requestError = error as { data?: { statusMessage?: string }; statusMessage?: string; message?: string }
+    alertActionError.value = requestError.data?.statusMessage ?? requestError.statusMessage ?? requestError.message ?? 'Unable to acknowledge alert.'
+  } finally {
+    acknowledgingIds.value = acknowledgingIds.value.filter(alertId => alertId !== id)
   }
 }
 const formatTime = (value: string | null) => value ? new Date(value).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : 'No reading yet'
 
-let timer: ReturnType<typeof setInterval> | undefined
-onMounted(() => { timer = setInterval(refreshAlerts, 10_000) })
-onUnmounted(() => { if (timer) clearInterval(timer) })
 </script>
 
 <template>
   <section class="page-content">
-    <ErrorNotice v-if="errorMessage" :message="errorMessage" />
     <ErrorNotice v-if="statusError" :message="statusError" />
     <div v-if="statusPending && !status" class="panel">Loading live status...</div>
     <template v-if="status">
@@ -91,6 +107,48 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
       <article class="panel"><div class="panel-heading"><div><span class="eyebrow">ALERT LEVELS</span><h2>Threshold guide</h2></div></div><div class="level-list"><div v-for="level in status.levels" :key="level.id" class="level-row"><span class="level-dot" :class="`level-${level.code}`"></span><div><strong>{{ level.label }}</strong><small>{{ level.description }}</small></div><b>{{ level.level_ft }} ft</b></div></div></article>
     </div>
     </template>
-    <article class="panel"><div class="panel-heading"><div><span class="eyebrow">RECENT ALERTS</span><h2>Review and acknowledge</h2></div><NuxtLink to="/system-admin/flood-reports" class="text-link">View reports →</NuxtLink></div><div class="alert-list"><div v-for="alert in alerts.items" :key="alert.id" class="alert-row"><span class="level-dot" :class="`level-${alert.alert_level ?? 'normal'}`"></span><div class="alert-copy"><strong>{{ alert.alert_label ?? 'Notice' }}</strong><p>{{ alert.message }}</p><small>{{ formatTime(alert.triggered_at) }}</small></div><button v-if="!alert.acknowledged_at" class="button secondary" @click="acknowledge(alert.id)">Acknowledge</button><span v-else class="acknowledged">Acknowledged</span></div></div></article>
+    <article class="panel">
+      <div class="panel-heading">
+        <div><span class="eyebrow">RECENT ALERTS</span><h2>Review and acknowledge</h2></div>
+        <NuxtLink to="/system-admin/flood-reports" class="text-link">View reports →</NuxtLink>
+      </div>
+      <ErrorNotice v-if="alertActionError" :message="alertActionError" />
+      <ErrorNotice v-if="alertsError" :message="alertsError" />
+      <div v-if="alertsPending && !alerts.length" class="alert-state">Loading alerts...</div>
+      <div v-else-if="alertsError && !alerts.length" class="alert-state">Alerts could not be loaded.</div>
+      <div v-else-if="!alerts.length" class="alert-state">No alerts yet.</div>
+      <template v-else>
+        <div class="alert-list">
+          <div v-for="alert in alerts" :key="alert.id" class="alert-row">
+            <span class="level-pill" :class="`level-${alert.alert_level ?? 'normal'}`">{{ alert.alert_label ?? 'General notice' }}</span>
+            <div class="alert-copy">
+              <small class="tag">{{ alert.source === 'sensor' ? 'Sensor' : 'Manual' }}</small>
+              <p>{{ alert.message }}</p>
+              <small>Triggered {{ formatTime(alert.triggered_at) }}<template v-if="alert.created_by_name"> · Sent by {{ alert.created_by_name }}</template></small>
+              <small v-if="alert.acknowledged_at">Acknowledged by {{ alert.acknowledged_by_name ?? 'Unknown user' }} · {{ formatTime(alert.acknowledged_at) }}</small>
+              <small v-else>Not acknowledged yet</small>
+            </div>
+            <button v-if="!alert.acknowledged_at" class="button secondary" :disabled="acknowledgingIds.includes(alert.id)" @click="acknowledge(alert.id)">
+              {{ acknowledgingIds.includes(alert.id) ? 'Acknowledging...' : 'Acknowledge' }}
+            </button>
+            <span v-else class="acknowledged">Acknowledged</span>
+          </div>
+        </div>
+        <div class="alert-pagination">
+          <label>Per page
+            <select v-model.number="alertsLimit">
+              <option :value="10">10</option>
+              <option :value="20">20</option>
+              <option :value="50">50</option>
+            </select>
+          </label>
+          <span>Page {{ alertsPage }} of {{ alertsTotalPages }} · {{ alertsTotal }} alerts</span>
+          <div>
+            <button class="button secondary" :disabled="alertsPage <= 1" @click="previousAlertsPage">Previous</button>
+            <button class="button secondary" :disabled="alertsPage >= alertsTotalPages" @click="nextAlertsPage">Next</button>
+          </div>
+        </div>
+      </template>
+    </article>
   </section>
 </template>
