@@ -31,7 +31,7 @@ const links = [
 </div>
     </aside>
     <main class="admin-main">
-      <header class="topbar"><div><span class="eyebrow">BARANGAY NIOG · BACOOR, CAVITE</span><h1>{{ links.find(link => link.to === route.path)?.label ?? 'Staff dashboard' }}</h1></div><div class="connection"><span class="status-dot"></span> Mock data mode</div></header>
+      <header class="topbar"><div><span class="eyebrow">BARANGAY NIOG · BACOOR, CAVITE</span><h1>{{ links.find(link => link.to === route.path)?.label ?? 'Staff dashboard' }}</h1></div></header>
       <slot />
     </main>
   </div>
