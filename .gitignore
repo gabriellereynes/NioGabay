@@ -1,3 +1,5 @@
+firmware/niogabay-esp32/secrets.h
+
 # Nuxt dev/build outputs
 .output
 .data
@@ -22,3 +24,5 @@ logs
 .env
 .env.*
 !.env.example
+
+.vscode/ 
