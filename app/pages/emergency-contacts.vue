@@ -1,5 +1,5 @@
 
-<script setup>
+<script setup lang="ts">
 useHead({
   title: 'Emergency Contacts | NioGabay',
   meta: [
@@ -10,39 +10,36 @@ useHead({
   ]
 })
 
-// TEMPORARY MOCK DATA??
-// Will be replaced with GET /api/public/emergency-contacts??
+// FETCH EMERGENCY CONTACTS FROM PUBLIC API
+const {
+  emergencyContacts,
+  pending,
+  errorMessage,
+  refresh
+} = useEmergencyContacts()
 
-const emergencyContacts = [
-  {
-    id: 1,
-    name: 'Barangay Niog Office',
-    category: 'Barangay',
-    number: '0951 775 5230\n(046) 423 - 5419' 
-  },
+// EMERGENCY CONTACT CATEGORY COLORS
+const getCategoryClass = (category: string | null) => {
+  switch (category?.toLowerCase()) {
+    case 'barangay':
+      return 'bg-blue-100 text-blue-800'
 
-  {
-    id: 2,
-    name: 'Barangay PNP',
-    category: 'Barangay',
-    number: '0977 752 0819\n0998 598 5593\n(046) 416 - 7510' 
-  },
+    case 'police':
+      return 'bg-indigo-100 text-indigo-800'
 
-  {
-    id: 3,
-    name: 'BDRRMO',
-    category: 'Barangay',
-    number: '161 / (046) 417 - 0727' 
-  },
+    case 'fire':
+      return 'bg-red-100 text-red-800'
 
-  {
-    id: 1,
-    name: 'BFP - BACOOR',
-    category: 'Barangay',
-    number: '0966 6959 711' 
+    case 'bdrrmo':
+      return 'bg-purple-100 text-purple-800'
+
+    case 'medical':
+      return 'bg-green-100 text-green-800'
+
+    default:
+      return 'bg-slate-100 text-slate-700'
   }
-]
-
+}
 </script>
 
 <template>
@@ -74,10 +71,55 @@ const emergencyContacts = [
           <h2 class="text-2xl font-bold text-slate-900">
             Important Contact Numbers
           </h2>
+
+          <p class="mt-2 text-sm text-slate-500">
+            View important emergency contact numbers for Barangay Niog.
+          </p>
+        </div>
+
+        <!-- LOADING MESSAGE -->
+        <div
+          v-if="pending && emergencyContacts.length === 0"
+          class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm"
+        >
+          <p class="text-sm text-slate-500">
+            Loading emergency contacts...
+          </p>
+        </div>
+
+        <!-- ERROR MESSAGE -->
+        <div
+          v-else-if="errorMessage && emergencyContacts.length === 0"
+          class="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700"
+        >
+          <p>
+            Unable to load emergency contacts: {{ errorMessage }}
+          </p>
+
+          <button
+            type="button"
+            class="mt-3 font-semibold underline hover:text-red-900"
+            @click="refresh()"
+          >
+            Try Again
+          </button>
+        </div>
+
+        <!-- EMPTY MESSAGE -->
+        <div
+          v-else-if="emergencyContacts.length === 0"
+          class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm"
+        >
+          <p class="text-sm text-slate-500">
+            No emergency contacts available.
+          </p>
         </div>
 
         <!-- CONTACT CARDS -->
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          v-else
+          class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
 
           <article
             v-for="contact in emergencyContacts"
@@ -90,13 +132,22 @@ const emergencyContacts = [
               {{ contact.name }}
             </h3>
 
+            <!-- CATEGORY TAG -->
+            <span
+              v-if="contact.category"
+              class="mt-3 inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold"
+              :class="getCategoryClass(contact.category)"
+            >
+              {{ contact.category }}
+            </span>
+
             <!-- CONTACT NUMBER -->
             <div class="mt-5 border-t border-slate-100 pt-5">
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Contact Number
               </p>
 
-              <p class="mt-2 whitespace-pre-line text-lg leading-tight font-bold text-blue-800">
+              <p class="mt-2 whitespace-pre-line text-lg font-bold leading-tight text-blue-800">
                 {{ contact.number }}
               </p>
             </div>
