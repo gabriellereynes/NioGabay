@@ -14,7 +14,7 @@ float readOnce() {
   unsigned long us = pulseIn(ECHO_PIN, HIGH, 40000);  // timeout 40 ms (~680 cm)
   if (us == 0) return -1;
   return us * 0.034 / 2.0;
-}
+} // 0.0349 value adjust based on room temp
 
 void setup() {
   Serial.begin(115200);
