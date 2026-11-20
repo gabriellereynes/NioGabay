@@ -115,7 +115,16 @@ textarea { min-height: 70px; resize: vertical; }
 .swal-form label { display: grid; gap: 6px; }
 .swal-form .swal2-input, .swal-form .swal2-textarea { margin: 0; width: 100%; box-sizing: border-box; }
 .swal-form .field-counter { margin: 0; text-align: right; }
+.swal-center-form, .swal-center-summary { display: grid; gap: 12px; text-align: left; }
+.swal-center-form label { display: grid; gap: 6px; }
+.swal-center-form label.center-open-toggle { display: flex; align-items: center; justify-content: flex-start; }
+.swal-center-form .swal2-input, .swal-center-form .swal2-textarea { margin: 0; width: 100%; box-sizing: border-box; }
+.swal-center-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.swal-center-summary-row { display: grid; grid-template-columns: minmax(110px, .7fr) 1.3fr; gap: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+.swal-center-summary-row strong { color: #334155; }
+.swal-center-summary-row span { color: #475569; overflow-wrap: anywhere; }
 @media (max-width: 900px) { .sidebar { width: 210px; flex-basis: 210px; } .metric-grid, .content-grid, .two-column { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .swal-center-form-row { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .admin-frame { display: block; } .sidebar { width: 100%; padding: 16px; } .brand { padding-bottom: 18px; } .sidebar-footer { margin-top: 18px; } .nav-list { grid-template-columns: repeat(3, 1fr); } .nav-link { text-align: center; font-size: 12px; } .topbar { align-items: flex-start; flex-direction: column; padding: 20px; } .page-content { padding: 20px 16px 40px; } .panel, .metric-card { padding: 18px; } .alert-pagination { align-items: stretch; flex-direction: column; } .alert-row { align-items: flex-start; flex-wrap: wrap; } }
 
 /* logout button test */
