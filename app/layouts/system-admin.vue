@@ -8,6 +8,7 @@ const links = [
   { label: 'Flood reports', to: '/system-admin/flood-reports' },
   { label: 'Announcements', to: '/system-admin/announcements' },
   { label: 'Evacuation centers', to: '/system-admin/evacuation-centers' }
+  { label: 'Users', to: '/system-admin/users' }
 ]
 </script>
 
