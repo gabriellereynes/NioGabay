@@ -4,24 +4,30 @@
 #include <WiFiClientSecure.h>
 #include "secrets.h"
 
-
-// testcomentttt
+#define TRIG_PIN 5
+#define ECHO_PIN 18
+const float SPEED_CM_PER_US = 0.034;  // speed of sound; temperature limitation noted in the paper
+const int SAMPLE_COUNT = 5;
+const int SAMPLE_GAP_MS = 100;
+const int MIN_VALID = 3;
+const float MIN_CM = 20.0;  // server accepts 20 to 500
+const float MAX_CM = 500.0;
 
 #define LED 2
 
 // ---- timing ----
-const unsigned long SEND_INTERVAL_MS  = 30000;   // normal cycle
-const unsigned long MOUNT_RETRY_MS    = 300000;  // after a 409: 5 minutes
-const unsigned long FAIL_LIMIT_MS     = 600000;  // 10 minutes of failures -> recover
-const unsigned long WIFI_TIMEOUT_MS   = 20000;   // give up one connect attempt after 20 s
-const uint16_t      HTTP_TIMEOUT_MS   = 60000;   // Render can take ~1 min to wake
+const unsigned long SEND_INTERVAL_MS = 30000;  // normal cycle
+const unsigned long MOUNT_RETRY_MS = 300000;   // after a 409: 5 minutes
+const unsigned long FAIL_LIMIT_MS = 600000;    // 10 minutes of failures -> recover
+const unsigned long WIFI_TIMEOUT_MS = 20000;   // give up one connect attempt after 20 s
+const uint16_t HTTP_TIMEOUT_MS = 60000;        // Render can take ~1 min to wake
 
 // ---- state ----
 unsigned long lastAttempt = 0;
-unsigned long sendInterval = 0;      // 0 so the first reading goes out right away
+unsigned long sendInterval = 0;  // 0 so the first reading goes out right away
 bool firstCycle = true;
-bool keyRejected = false;            // set by a 401, stops all sending
-bool failing = false;                // inside a streak of connection failures
+bool keyRejected = false;  // set by a 401, stops all sending
+bool failing = false;      // inside a streak of connection failures
 unsigned long failStart = 0;
 
 // ---------- LED helpers ----------
@@ -82,10 +88,38 @@ void markFailure() {
   }
 }
 
-// ---------- sensor (placeholder until A5) ----------
-// returns distance in cm, or -1 if there is no valid reading
+float readOnce() {
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(5);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(20);
+  digitalWrite(TRIG_PIN, LOW);
+  unsigned long us = pulseIn(ECHO_PIN, HIGH, 40000);
+  if (us == 0) return -1;
+  return us * SPEED_CM_PER_US / 2.0;
+}
+
+// median of 5 samples, or -1 if fewer than 3 are valid
 float readDistanceCm() {
-  return 188.4;   // TODO A5: replace with the real JSN-SR04T median reading
+  float v[SAMPLE_COUNT];
+  int n = 0;
+  for (int i = 0; i < SAMPLE_COUNT; i++) {
+    float d = readOnce();
+    if (d >= MIN_CM && d <= MAX_CM) v[n++] = d;  // drops timeouts, 0 and out-of-range
+    delay(SAMPLE_GAP_MS);
+  }
+  if (n < MIN_VALID) return -1;
+  for (int i = 1; i < n; i++) {  // simple sort
+    float key = v[i];
+    int j = i - 1;
+    while (j >= 0 && v[j] > key) {
+      v[j + 1] = v[j];
+      j--;
+    }
+    v[j + 1] = key;
+  }
+  if (n % 2 == 1) return v[n / 2];
+  return (v[n / 2 - 1] + v[n / 2]) / 2.0;
 }
 
 // ---------- sending ----------
@@ -130,8 +164,8 @@ void handleResult(int code) {
     sendInterval = SEND_INTERVAL_MS;
     flashLed(150);
   } else if (code == 400) {
-    clearFailure();                     // server answered, so the network is fine
-    sendInterval = SEND_INTERVAL_MS;    // do not retry this reading
+    clearFailure();                   // server answered, so the network is fine
+    sendInterval = SEND_INTERVAL_MS;  // do not retry this reading
     Serial.println("400: reading rejected, not retrying it");
   } else if (code == 401) {
     keyRejected = true;
@@ -151,7 +185,10 @@ void handleResult(int code) {
 void setup() {
   Serial.begin(115200);
   pinMode(LED, OUTPUT);
-  connectWiFi();   // if this times out, loop() keeps trying
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  digitalWrite(TRIG_PIN, LOW);
+  connectWiFi();  // if this times out, loop() keeps trying
 }
 
 void loop() {
