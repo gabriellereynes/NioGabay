@@ -6,7 +6,8 @@ const me = await getMe()
 const links = [
   { label: 'Dashboard', to: '/system-admin' },
   { label: 'Flood reports', to: '/system-admin/flood-reports' },
-  { label: 'Announcements', to: '/system-admin/announcements' }
+  { label: 'Announcements', to: '/system-admin/announcements' },
+  { label: 'Evacuation centers', to: '/system-admin/evacuation-centers' }
 ]
 </script>
 

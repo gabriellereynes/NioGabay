@@ -1,5 +1,5 @@
 
-<script setup>
+<script setup lang="ts">
 useHead({
   title: 'Evacuation Centers | NioGabay',
   meta: [
@@ -10,23 +10,11 @@ useHead({
   ]
 })
 
-// TEMPORARY MOCK DATA
-// Will be replaced with GET /api/public/evacuation-centers
-
-const evacuationCenters = [
-  {
-    id: 1,
-    name: 'Niog Elementary School',
-    address: 'Niog I, Bacoor, Cavite',
-    latitude: null,
-    longitude: null,
-    capacity: 150,
-    contact_person: 'School Representative',
-    contact_number: '09XX XXX XXXX',
-    is_open: true
-    // notes: 'Sample information. Replace with verified details.'
-  }
-]
+const {
+  centers: evacuationCenters,
+  pending,
+  errorMessage
+} = useEvacuationCentersAdmin()
 </script>
 
 <template>
@@ -56,12 +44,24 @@ const evacuationCenters = [
 
         <div class="mb-8">
           <h2 class="text-2xl font-bold text-slate-900">
-            Available Evacuation Centers
+            Evacuation Centers
           </h2>
         </div>
 
-        <!-- CENTER CARDS -->
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div v-if="pending" class="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center">
+          <p class="text-sm text-slate-500">Loading evacuation centers...</p>
+        </div>
+
+        <div v-else-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 px-6 py-10 text-center" role="alert">
+          <h3 class="text-lg font-bold text-red-800">Unable to load evacuation centers</h3>
+          <p class="mt-2 text-sm text-red-700">{{ errorMessage }}</p>
+        </div>
+
+        <div v-else-if="evacuationCenters.length === 0" class="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center">
+          <p class="text-sm text-slate-500">No evacuation centers yet.</p>
+        </div>
+
+        <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
           <article
             v-for="center in evacuationCenters"
@@ -91,7 +91,7 @@ const evacuationCenters = [
 
             <p class="mt-3 text-sm leading-relaxed text-slate-600">
               <span class="font-semibold text-slate-700">Address:</span>
-              {{ center.address }}
+              {{ center.address || 'Not provided' }}
             </p>
 
             <!-- CENTER INFORMATION -->
@@ -103,7 +103,7 @@ const evacuationCenters = [
                   Capacity
                 </p>
                 <p class="mt-1 font-semibold text-slate-700">
-                  {{ center.capacity }} people
+                  {{ center.capacity ?? 'Not specified' }}{{ center.capacity === null ? '' : ' people' }}
                 </p>
               </div>
 
@@ -113,7 +113,7 @@ const evacuationCenters = [
                   Person in Charge
                 </p>
                 <p class="mt-1 font-semibold text-slate-700">
-                  {{ center.contact_person }}
+                  {{ center.contact_person || 'Not provided' }}
                 </p>
               </div>
 
@@ -123,15 +123,13 @@ const evacuationCenters = [
                   Contact Number
                 </p>
                 <p class="mt-1 font-semibold text-blue-800">
-                  {{ center.contact_number }}
+                  {{ center.contact_number || 'Not provided' }}
                 </p>
               </div>
 
             </div>
 
-            <!-- NOTES - ADD ONLY WHEN NEEDED -->
-            <!--
-            <div class="mt-5 rounded-lg bg-slate-50 p-4">
+            <div v-if="center.notes" class="mt-5 rounded-lg bg-slate-50 p-4">
               <p class="text-xs font-bold uppercase tracking-wide text-slate-500">
                 Additional Information
               </p>
@@ -140,7 +138,6 @@ const evacuationCenters = [
                 {{ center.notes }}
               </p>
             </div>
-            -->
 
           </article>
         </div>
