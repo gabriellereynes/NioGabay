@@ -46,7 +46,7 @@ const {
 
         <div class="mb-8">
           <h2 class="text-2xl font-bold text-slate-900">
-            Available Evacuation Centers
+            Evacuation Centers
           </h2>
           <p class="mt-2 text-sm text-slate-500">
             View registered evacuation centers and their current status.
@@ -126,7 +126,7 @@ const {
 
             <p class="mt-3 text-sm leading-relaxed text-slate-600">
               <span class="font-semibold text-slate-700">Address:</span>
-              {{ center.address || 'Address unavailable' }}
+              {{ center.address || 'Not provided' }}
             </p>
 
             <!-- CENTER INFORMATION -->
@@ -150,7 +150,7 @@ const {
                 </p>
 
                 <p class="mt-1 font-semibold text-slate-700">
-                  {{ center.contact_person || 'Not specified' }}
+                  {{ center.contact_person || 'Not provided' }}
                 </p>
               </div>
 
@@ -161,7 +161,7 @@ const {
                 </p>
 
                 <p class="mt-1 font-semibold text-blue-800">
-                  {{ center.contact_number || 'Not available' }}
+                  {{ center.contact_number || 'Not provided' }}
                 </p>
               </div>
 
