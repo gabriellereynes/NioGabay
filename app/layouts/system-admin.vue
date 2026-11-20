@@ -7,7 +7,8 @@ const links = [
   { label: 'Dashboard', to: '/system-admin' },
   { label: 'Flood reports', to: '/system-admin/flood-reports' },
   { label: 'Announcements', to: '/system-admin/announcements' },
-  { label: 'Evacuation centers', to: '/system-admin/evacuation-centers' }
+  { label: 'Evacuation centers', to: '/system-admin/evacuation-centers' },
+  { label: 'Emergency contacts', to: '/system-admin/emergency-contacts' },
   { label: 'Users', to: '/system-admin/users' }
 ]
 </script>
