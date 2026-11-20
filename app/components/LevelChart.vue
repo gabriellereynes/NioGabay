@@ -25,13 +25,19 @@ const formatManila = (timestamp: number) => new Intl.DateTimeFormat('en-PH', {
   timeZone: 'Asia/Manila'
 }).format(new Date(timestamp))
 
+const getThresholdLines = () => props.levels.map(level => ({
+  yAxis: level.level_cm,
+  name: level.code
+}))
+
 const updateChart = () => {
   if (!chartInstance) return
 
   chartInstance.setOption({
     yAxis: { max: maxWaterLevel.value },
     series: [{
-      data: props.chartPoints.map(point => [point.x, point.y])
+      data: props.chartPoints.map(point => [point.x, point.y]),
+      markLine: { data: getThresholdLines() }
     }]
   })
 }
@@ -88,19 +94,38 @@ onMounted(async () => {
         opacity: 0.12
       },
       markLine: {
-        silent: true,
+        silent: false,
         symbol: 'none',
+        tooltip: {
+          show: true,
+          trigger: 'item',
+          formatter: (params: { name?: string }) => {
+            const level = props.levels.find(item => item.code === params.name)
+            return level ? `${level.label} · ${level.level_ft} ft` : ''
+          }
+        },
         label: {
-          formatter: (params: { name?: string }) => params.name ?? ''
+          formatter: (params: { name?: string }) => {
+            switch (params.name) {
+              case 'yellow': return '{yellow|●}'
+              case 'evacuation': return '{evacuation|●}'
+              case 'orange': return '{orange|●}'
+              case 'red': return '{red|●}'
+              default: return ''
+            }
+          },
+          rich: {
+            yellow: { color: '#f59e0b', fontSize: 14, fontWeight: 'bold' },
+            evacuation: { color: '#f97316', fontSize: 14, fontWeight: 'bold' },
+            orange: { color: '#ea580c', fontSize: 14, fontWeight: 'bold' },
+            red: { color: '#dc2626', fontSize: 14, fontWeight: 'bold' }
+          }
         },
         lineStyle: {
           type: 'dashed',
           color: '#94A3B8'
         },
-        data: props.levels.map(level => ({
-          yAxis: level.level_cm,
-          name: `${level.label} · ${level.level_ft} ft`
-        }))
+        data: getThresholdLines()
       }
     }]
   })

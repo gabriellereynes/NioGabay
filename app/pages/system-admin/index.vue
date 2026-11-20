@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Swal from 'sweetalert2'
-import type { ReadingRange } from '~~/shared/types/api'
+import type { AlertLevel, ReadingRange } from '~~/shared/types/api'
 
 definePageMeta({ layout: 'system-admin', middleware: 'admin', allowedRoles: ['admin'] })
 
@@ -13,6 +13,13 @@ const {
   pending: statusPending,
   refresh: refreshStatus
 } = useFloodStatus({ staff: true })
+const {
+  levels: alertLevels,
+  pending: alertLevelsPending,
+  busy: alertLevelsBusy,
+  errorMessage: alertLevelsError,
+  updateLevel
+} = useAlertLevels()
 const range = ref<ReadingRange>('24h')
 const {
   chartPoints,
@@ -35,7 +42,83 @@ const {
 } = useAlerts()
 const alertActionError = ref('')
 const acknowledgingIds = ref<number[]>([])
+const thresholdSaveInProgress = ref(false)
 const ranges: ReadingRange[] = ['24h', '7d', '30d', '90d']
+
+const requestErrorMessage = (error: unknown) => {
+  const requestError = error as {
+    data?: { statusMessage?: string }
+    statusMessage?: string
+    message?: string
+  }
+  return requestError.data?.statusMessage
+    ?? requestError.statusMessage
+    ?? requestError.message
+    ?? 'Unable to update the alert threshold.'
+}
+
+const editThreshold = async (level: AlertLevel) => {
+  if (thresholdSaveInProgress.value || alertLevelsBusy.value) return
+
+  const result = await Swal.fire<number>({
+    title: `Edit ${level.label} threshold`,
+    html: `
+      <label for="alert-level-ft">Threshold (feet)
+        <input id="alert-level-ft" class="swal2-input" type="number" min="0.01" max="30" step="0.01" required value="${level.level_ft}">
+      </label>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Continue',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#087f82',
+    cancelButtonColor: '#6f7d83',
+    focusConfirm: false,
+    preConfirm: () => {
+      const input = Swal.getPopup()?.querySelector<HTMLInputElement>('#alert-level-ft')
+      if (!input || !input.value || !input.checkValidity()) {
+        Swal.showValidationMessage('Enter a value above 0 and at most 30 ft, with up to two decimals.')
+        return false
+      }
+
+      const value = Number(input.value)
+      if (!Number.isFinite(value) || value <= 0 || value > 30) {
+        Swal.showValidationMessage('Enter a value above 0 and at most 30 ft, with up to two decimals.')
+        return false
+      }
+
+      return value
+    }
+  })
+
+  if (!result.isConfirmed || result.value === undefined) return
+
+  const confirmation = await Swal.fire({
+    title: 'Confirm threshold change?',
+    text: 'New readings will use the new threshold. Past alerts are not changed.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Save threshold',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#087f82',
+    cancelButtonColor: '#6f7d83'
+  })
+  if (!confirmation.isConfirmed) return
+
+  thresholdSaveInProgress.value = true
+  try {
+    await updateLevel(level.id, result.value)
+    await refreshStatus()
+  } catch (error) {
+    await Swal.fire({
+      title: 'Threshold not updated',
+      text: requestErrorMessage(error),
+      icon: 'error',
+      confirmButtonColor: '#087f82'
+    })
+  } finally {
+    thresholdSaveInProgress.value = false
+  }
+}
 
 const acknowledge = async (id: number) => {
   const result = await Swal.fire({
@@ -104,7 +187,33 @@ const formatTime = (value: string | null) => value ? new Date(value).toLocaleStr
 </span></div>
         </template>
       </article>
-      <article class="panel"><div class="panel-heading"><div><span class="eyebrow">ALERT LEVELS</span><h2>Threshold guide</h2></div></div><div class="level-list"><div v-for="level in status.levels" :key="level.id" class="level-row"><span class="level-dot" :class="`level-${level.code}`"></span><div><strong>{{ level.label }}</strong><small>{{ level.description }}</small></div><b>{{ level.level_ft }} ft</b></div></div></article>
+      <article class="panel">
+        <div class="panel-heading">
+          <div><span class="eyebrow">ALERT LEVELS</span><h2>Threshold guide</h2></div>
+        </div>
+        <ErrorNotice v-if="alertLevelsError" :message="alertLevelsError" />
+        <div v-else-if="alertLevelsPending && !alertLevels.length" class="alert-state">Loading alert levels...</div>
+        <div v-else-if="!alertLevels.length" class="alert-state">No alert levels available.</div>
+        <div v-else class="level-list">
+          <div v-for="level in alertLevels" :key="level.id" class="level-row">
+            <span class="level-dot" :class="`level-${level.code}`"></span>
+            <div>
+              <strong>{{ level.label }}</strong>
+              <small>{{ level.description }}</small>
+            </div>
+            <b>{{ level.level_ft }} ft</b>
+            <button
+              class="button secondary"
+              type="button"
+              :disabled="alertLevelsBusy || thresholdSaveInProgress"
+              :aria-label="`Edit ${level.label} threshold`"
+              @click="editThreshold(level)"
+            >
+              Edit
+            </button>
+          </div>
+        </div>
+      </article>
     </div>
     </template>
     <article class="panel">
