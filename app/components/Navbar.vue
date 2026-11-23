@@ -42,13 +42,6 @@ const navLinks = [
         </NuxtLink>
 
         <NuxtLink
-          to="/subscribe"
-          class="rounded-lg border border-blue-700 px-5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
-        >
-          Subscribe to SMS Alerts
-        </NuxtLink>
-
-        <NuxtLink
           to="/login"
           class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
         >
@@ -102,13 +95,6 @@ const navLinks = [
           {{ link.label }}
         </NuxtLink>
 
-        <NuxtLink
-          to="/subscribe"
-          class="w-fit self-start rounded-lg border border-blue-700 px-5 py-3 text-center text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
-          @click="isMenuOpen = false"
-        >
-          Subscribe to SMS Alerts
-        </NuxtLink>
 
         <!--LOGIN BUTTON-->
         <NuxtLink

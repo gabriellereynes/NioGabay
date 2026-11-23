@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { Mail, Lock, Eye, EyeOff } from '@lucide/vue'
+import { Mail, Lock, Eye, EyeOff, ArrowLeft } from '@lucide/vue'
 
 useHead({
   title: 'Login | NioGabay',
@@ -59,6 +59,10 @@ const submit = async () => {
 
       <!-- LOGIN CARD -->
       <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+
+        <!-- BACK BUTTON -->
+          <NuxtLink to="/" class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-700">
+            <ArrowLeft :size="18" /> Back </NuxtLink>
 
         <!-- HEADER -->
         <div class="mb-8 text-center">
