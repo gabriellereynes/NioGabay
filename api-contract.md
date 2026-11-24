@@ -24,7 +24,7 @@ This file says exactly what data every route sends and receives, so the public p
    new Date(iso).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })
    ```
 4. **Units:** the server sends the water level in both `cm` and `ft`. The barangay thinks in feet, so show **feet** to people. Never convert yourselves.
-5. **Alert levels** run lowest to highest: `normal` < `yellow` < `evacuation` < `orange` < `red`. The labels and thresholds come from the API and the admin can change them. **Never hardcode 1, 2, 3 or 4 ft in a screen.** Draw the gauge from the `levels` array.
+5. **Alert levels** run lowest to highest: `normal` < `yellow` < `orange` < `red`. The labels and thresholds come from the API and the admin can change them. **Never hardcode threshold values in a screen.** Draw the gauge from the `levels` array.
 6. **Sensor offline is a safety rule.** If `sensor_online` is `false`, the level on screen may be old. Both the public page and the dashboard **must** show a clear "No recent data, last update at ..." warning and must not present the level as live.
 7. **Missing values are always `null`.** Fields are never left out, so you can rely on every key being there.
 8. **Lists:** small fixed lists come back as a plain array. Lists that can grow come back as `{ "items": [...], "total": 123 }` and accept `?limit=20&offset=0` (default limit 20, maximum 100).
@@ -147,13 +147,12 @@ The current flood status. This is the main feed for the resident-facing page. Ty
   "last_reading_at": "2026-11-10T01:23:45.000Z",
   "water_level_cm": 62,
   "water_level_ft": 2,
-  "alert_level": "evacuation",
-  "alert_label": "Evacuation",
+  "alert_level": "yellow",
+  "alert_label": "Yellow - Warning",
   "levels": [
     { "id": 1, "code": "yellow", "label": "Yellow - Warning", "level_ft": 1, "level_cm": 30.5, "description": "Water reached 1 ft." },
-    { "id": 2, "code": "evacuation", "label": "Evacuation", "level_ft": 2, "level_cm": 61, "description": "Start rescue and evacuation." },
-    { "id": 3, "code": "orange", "label": "Orange - Alert", "level_ft": 3, "level_cm": 91.4, "description": "Assumed value." },
-    { "id": 4, "code": "red", "label": "Red - Critical", "level_ft": 4, "level_cm": 121.9, "description": "Assumed value." }
+    { "id": 2, "code": "orange", "label": "Orange - Alert", "level_ft": 3, "level_cm": 91.4, "description": "Assumed value." },
+    { "id": 3, "code": "red", "label": "Red - Critical", "level_ft": 4, "level_cm": 121.9, "description": "Assumed value." }
   ]
 }
 ```
@@ -262,11 +261,12 @@ Everything in `FloodStatus` plus technical details for the dashboard. Type `Staf
   "last_reading_at": "2026-11-10T01:23:45.000Z",
   "water_level_cm": 62,
   "water_level_ft": 2,
-  "alert_level": "evacuation",
-  "alert_label": "Evacuation",
+  "alert_level": "yellow",
+  "alert_label": "Yellow - Warning",
   "levels": [
     { "id": 1, "code": "yellow", "label": "Yellow - Warning", "level_ft": 1, "level_cm": 30.5, "description": null },
-    { "id": 2, "code": "evacuation", "label": "Evacuation", "level_ft": 2, "level_cm": 61, "description": null }
+    { "id": 2, "code": "orange", "label": "Orange - Alert", "level_ft": 3, "level_cm": 91.4, "description": null },
+    { "id": 3, "code": "red", "label": "Red - Critical", "level_ft": 4, "level_cm": 121.9, "description": null }
   ],
   "sensor": {
     "id": "00000000-0000-0000-0000-000000000001",
@@ -291,7 +291,7 @@ History for the dashboard chart. `range` is `24h`, `7d`, `30d` or `90d`. Same sh
 
 #### `GET /api/staff/alert-levels`
 
-The four thresholds as a plain array of `AlertLevel` (same objects as `levels` above).
+The three active thresholds as a plain array of `AlertLevel` (same objects as `levels` above).
 
 #### `GET /api/staff/alerts?limit=20&offset=0`
 
@@ -305,10 +305,10 @@ Newest first. Type `Paged<AlertRecord>`.
     {
       "id": 3,
       "source": "sensor",
-      "alert_level": "evacuation",
-      "alert_label": "Evacuation",
-      "message": "Evacuation: water level is 62 cm (2 ft).",
-      "water_level_cm": 62,
+      "alert_level": "orange",
+      "alert_label": "Orange - Alert",
+      "message": "Orange - Alert: water level is 92 cm (3 ft).",
+      "water_level_cm": 92,
       "triggered_at": "2026-11-10T01:03:00.000Z",
       "created_by_name": null,
       "acknowledged_by_name": null,
@@ -432,7 +432,7 @@ Send only the fields to change (`FloodReportPatch`). Returns the updated `FloodR
 { "level_ft": 3.5 }
 ```
 
-Returns the updated `AlertLevel`. The order must stay yellow < evacuation < orange < red, or the server answers 400.
+Returns the updated `AlertLevel`. The order must stay yellow < orange < red, or the server answers 400.
 
 #### `POST /api/admin/alerts`
 

@@ -1,7 +1,7 @@
 // Shared by the alert routes: turns rows of the `alerts` table into the AlertRecord the
 // contract promises (level code and label, water level, and the names of the people).
 // It does a few plain queries and joins them here, instead of relying on database embeds.
-import type { AlertLevelCode, AlertRecord } from '../../shared/types/api'
+import type { AlertRecord } from '../../shared/types/api'
 
 /** Use this in every `.select(...)` on the alerts table, so all routes read the same columns. */
 export const ALERT_COLUMNS =
@@ -52,7 +52,7 @@ export async function hydrateAlerts(rows: AlertRow[]): Promise<AlertRecord[]> {
     return {
       id: r.id,
       source: r.source,
-      alert_level: (level?.code ?? null) as AlertLevelCode | null,
+      alert_level: (level?.code ?? null) as AlertRecord['alert_level'],
       alert_label: level?.label ?? null,
       message: r.message,
       water_level_cm: r.reading_id === null ? null : readingById.get(r.reading_id) ?? null,

@@ -5,7 +5,7 @@
 // accepted, but NOTHING is texted. The dashboard must say so, so nobody thinks residents were warned.
 import type { AlertRecord, ManualAlertInput } from '../../../shared/types/api'
 
-const LEVEL_CODES = ['yellow', 'evacuation', 'orange', 'red']
+const LEVEL_CODES = ['yellow', 'orange', 'red']
 
 export default defineEventHandler(async (event): Promise<AlertRecord> => {
   const me = await requireUser(event, ['admin'])
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event): Promise<AlertRecord> => {
   if (level !== null && (typeof level !== 'string' || !LEVEL_CODES.includes(level))) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'alert_level must be yellow, evacuation, orange, red or null'
+      statusMessage: 'alert_level must be yellow, orange, red or null'
     })
   }
 

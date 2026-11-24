@@ -1,5 +1,5 @@
 // GET /api/staff/alert-levels   returns: AlertLevel[]   (staff or admin)
-// The four thresholds, lowest first.
+// The three active thresholds, lowest first.
 import { loadAlertLevels } from '~~/server/utils/floodStatus'
 import type { AlertLevel } from '../../../shared/types/api'
 

@@ -71,7 +71,6 @@ const getAlertClass = (level: string) => {
   const classes: Record<string, string> = {
     normal: 'bg-green-100 text-green-800',
     yellow: 'bg-yellow-100 text-yellow-800',
-    evacuation: 'bg-amber-100 text-amber-800',
     orange: 'bg-orange-100 text-orange-800',
     red: 'bg-red-100 text-red-800'
   }

@@ -35,20 +35,19 @@ const hoursAgo = (h: number) => minutesAgo(h * 60)
 // ---------- Alert levels (assumed: orange 3 ft, red 4 ft) ----------
 export const mockAlertLevels: AlertLevel[] = [
   { id: 1, code: 'yellow', label: 'Yellow - Warning', level_ft: 1, level_cm: 30.5, description: 'Water reached 1 ft.' },
-  { id: 2, code: 'evacuation', label: 'Evacuation', level_ft: 2, level_cm: 61, description: 'Start rescue and evacuation.' },
-  { id: 3, code: 'orange', label: 'Orange - Alert', level_ft: 3, level_cm: 91.4, description: 'Assumed value.' },
-  { id: 4, code: 'red', label: 'Red - Critical', level_ft: 4, level_cm: 121.9, description: 'Assumed value.' }
+  { id: 2, code: 'orange', label: 'Orange - Alert', level_ft: 3, level_cm: 91.4, description: 'Assumed value.' },
+  { id: 3, code: 'red', label: 'Red - Critical', level_ft: 4, level_cm: 121.9, description: 'Assumed value.' }
 ]
 
 // ---------- Status ----------
-/** Water at 2 ft: the "Evacuation" state. Edit alert_level / water_level_* by hand to see other states. */
+/** Water at 2 ft: above yellow and below orange. */
 export const mockFloodStatus: FloodStatus = {
   sensor_online: true,
   last_reading_at: minutesAgo(1),
   water_level_cm: 62,
   water_level_ft: 2,
-  alert_level: 'evacuation',
-  alert_label: 'Evacuation',
+  alert_level: 'yellow',
+  alert_label: 'Yellow - Warning',
   levels: mockAlertLevels
 }
 
@@ -103,8 +102,8 @@ export const mockAlerts: Paged<AlertRecord> = {
   total: 3,
   items: [
     {
-      id: 3, source: 'sensor', alert_level: 'evacuation', alert_label: 'Evacuation',
-      message: 'Evacuation: water level is 62 cm (2 ft).', water_level_cm: 62,
+      id: 3, source: 'sensor', alert_level: 'orange', alert_label: 'Orange - Alert',
+      message: 'Orange - Alert: water level is 92 cm (3 ft).', water_level_cm: 92,
       triggered_at: minutesAgo(20), created_by_name: null, acknowledged_by_name: null, acknowledged_at: null
     },
     {
