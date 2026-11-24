@@ -108,7 +108,6 @@ onMounted(async () => {
           formatter: (params: { name?: string }) => {
             switch (params.name) {
               case 'yellow': return '{yellow|●}'
-              case 'evacuation': return '{evacuation|●}'
               case 'orange': return '{orange|●}'
               case 'red': return '{red|●}'
               default: return ''
@@ -116,7 +115,6 @@ onMounted(async () => {
           },
           rich: {
             yellow: { color: '#f59e0b', fontSize: 14, fontWeight: 'bold' },
-            evacuation: { color: '#f97316', fontSize: 14, fontWeight: 'bold' },
             orange: { color: '#ea580c', fontSize: 14, fontWeight: 'bold' },
             red: { color: '#dc2626', fontSize: 14, fontWeight: 'bold' }
           }

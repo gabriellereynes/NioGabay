@@ -53,7 +53,7 @@ h2 { font-size: 20px; margin-top: 6px; }
 .level-pill, .tag { border-radius: 999px; padding: 5px 9px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .level-normal { background: #dcfce7; color: #166534; }
 .level-yellow { background: #fef3c7; color: #92400e; }
-.level-evacuation, .level-orange { background: #ffedd5; color: #c2410c; }
+.level-orange { background: #ffedd5; color: #c2410c; }
 .level-red { background: #fee2e2; color: #b91c1c; }
 .tag { background: #f1f5f9; color: #475569; }
 .online-label { color: #16a34a; font-size: 12px; font-weight: 700; }
@@ -84,7 +84,7 @@ h2 { font-size: 20px; margin-top: 6px; }
 .level-row small, .alert-copy small, .report-item small, table small { display: block; color: var(--dashboard-muted); font-size: 11px; margin-top: 4px; }
 .level-row b { font-size: 14px; }
 .level-dot { width: 10px; height: 10px; min-width: 10px; border-radius: 50%; background: #94a3b8; }
-.level-dot.level-yellow { background: #f59e0b; }.level-dot.level-evacuation { background: #f97316; }.level-dot.level-orange { background: #ea580c; }.level-dot.level-red { background: #dc2626; }
+.level-dot.level-yellow { background: #f59e0b; }.level-dot.level-orange { background: #ea580c; }.level-dot.level-red { background: #dc2626; }
 .alert-copy p { margin: 4px 0; color: #475569; font-size: 13px; }
 .acknowledged { color: #16a34a; font-size: 11px; }
 .button { border: 0; border-radius: 8px; padding: 10px 14px; font-weight: 700; font-size: 12px; cursor: pointer; }
@@ -176,6 +176,5 @@ textarea { min-height: 70px; resize: vertical; }
 }
 
 .chart-legend .legend-yellow { color: #ffc400; }
-.chart-legend .legend-evacuation { color: #ff8800; }
 .chart-legend .legend-orange { color: #ff5e00; }
 .chart-legend .legend-red { color: #ff0000; }

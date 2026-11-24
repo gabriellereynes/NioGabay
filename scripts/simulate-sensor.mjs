@@ -44,8 +44,8 @@ if (args.distance !== undefined) {
 } else if (args.level !== undefined) {
   await send(mount - Number(args.level))
 } else {
-  // Water depth in cm over time. Crosses yellow (30.5), evacuation (61),
-  // orange (91.4) and red (121.9), then drains.
+  // Water depth in cm over time. Crosses yellow (30.5), orange (91.4)
+  // and red (121.9), then drains.
   const waterLevels = [5, 20, 32, 45, 62, 75, 92, 105, 123, 110, 85, 60, 30, 10]
   for (const level of waterLevels) {
     await send(mount - level)

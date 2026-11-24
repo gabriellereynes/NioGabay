@@ -1,9 +1,9 @@
 // PATCH /api/admin/alert-levels/:id   body: { level_ft }   returns: AlertLevel   (admin only)
-// Changes one threshold. The order must stay yellow < evacuation < orange < red, or it is refused (400).
+// Changes one threshold. The order must stay yellow < orange < red, or it is refused (400).
 // Only NEW readings use the new value. Past alerts are not changed.
 import type { AlertLevel } from '../../../../../shared/types/api'
 
-const ORDER = ['yellow', 'evacuation', 'orange', 'red']
+const ORDER = ['yellow', 'orange', 'red']
 
 export default defineEventHandler(async (event): Promise<AlertLevel> => {
   await requireUser(event, ['admin'])
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event): Promise<AlertLevel> => {
     .map(l => (l.id === id ? levelFt : l.level_ft))
   for (let i = 1; i < afterChange.length; i++) {
     if ((afterChange[i] ?? 0) <= (afterChange[i - 1] ?? 0)) {
-      return badRequest('Levels must stay in order: yellow < evacuation < orange < red')
+      return badRequest('Levels must stay in order: yellow < orange < red')
     }
   }
 

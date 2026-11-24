@@ -37,11 +37,12 @@ const pickLevel = (levels: AlertLevel[], cm: number): AlertLevel | null => {
   return found
 }
 
-/** The four alert thresholds, lowest first. */
+/** The three active alert thresholds, lowest first. */
 export async function loadAlertLevels(): Promise<AlertLevel[]> {
   const { data, error } = await serverSupabase()
     .from('alert_levels')
     .select('id, code, label, level_ft, level_cm, description')
+    .in('code', ['yellow', 'orange', 'red'])
     .order('level_cm')
   if (error) {
     console.error('alert_levels failed', error)

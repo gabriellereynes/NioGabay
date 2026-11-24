@@ -90,6 +90,7 @@ export default defineEventHandler(async (event) => {
   const { data: levelRows, error: levelsError } = await db
     .from('alert_levels')
     .select('id, code, label, level_cm')
+    .in('code', ['yellow', 'orange', 'red'])
     .order('level_cm')
  
   const { data: previous, error: previousError } = await db

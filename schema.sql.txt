@@ -88,6 +88,7 @@ as $$
     (select code
        from public.alert_levels
       where level_cm <= p_water_level_cm
+        and code in ('yellow', 'orange', 'red')
       order by level_cm desc
       limit 1),
     'normal'
@@ -230,7 +231,6 @@ create trigger set_updated_at before update on public.emergency_contacts
 -- ---------- Starting data ----------
 insert into public.alert_levels (code, label, level_ft, description) values
   ('yellow',     'Yellow - Warning',  1.00, 'Water reached 1 ft. Yellow warning on the gauge (Chapter 4, 4.1).'),
-  ('evacuation', 'Evacuation',        2.00, 'Barangay starts rescue and evacuation of residents (Chapter 4, 4.1).'),
   ('orange',     'Orange - Alert',    3.00, 'ASSUMED value. Confirm with the barangay.'),
   ('red',        'Red - Critical',    4.00, 'ASSUMED value. Confirm with the barangay.');
 

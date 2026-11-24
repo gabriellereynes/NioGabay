@@ -12,14 +12,16 @@
 /** Timestamps are ISO 8601 strings in UTC, e.g. "2026-11-10T01:23:45.000Z". Show them in Asia/Manila. */
 export type ISODate = string
 
-/** The four real alert levels. Their thresholds (in ft) live in the database and can change. */
-export type AlertCode = 'yellow' | 'evacuation' | 'orange' | 'red'
+/** Alert thresholds. Their values (in ft) live in the database and can change. */
+export type AlertCode = 'yellow' | 'orange' | 'red'
 
 /** What the water is currently doing. 'normal' = below the lowest threshold. */
 export type AlertLevelCode = 'normal' | AlertCode
+/** Includes evacuation for alerts recorded before that threshold was removed. */
+export type AlertRecordLevelCode = AlertLevelCode | 'evacuation'
 
 /** Lowest to highest. Use it to compare levels: ALERT_ORDER.indexOf(a) > ALERT_ORDER.indexOf(b) */
-export const ALERT_ORDER: AlertLevelCode[] = ['normal', 'yellow', 'evacuation', 'orange', 'red']
+export const ALERT_ORDER: AlertLevelCode[] = ['normal', 'yellow', 'orange', 'red']
 
 export type Role = 'admin' | 'staff'
 export type AnnouncementCategory = 'flood' | 'evacuation' | 'advisory' | 'general'
@@ -59,9 +61,9 @@ export interface FloodStatus {
   water_level_cm: number | null
   water_level_ft: number | null
   alert_level: AlertLevelCode
-  /** Text to display, e.g. "Normal", "Evacuation", or "No data" */
+  /** Text to display, e.g. "Normal", "Yellow - Warning", or "No data" */
   alert_label: string
-  /** All four thresholds, lowest first. Use them to draw the gauge; never hardcode 1/2/3/4 ft. */
+  /** All three thresholds, lowest first. Use them to draw the gauge; never hardcode threshold values. */
   levels: AlertLevel[]
 }
 
@@ -103,7 +105,7 @@ export interface AlertRecord {
   /** 'sensor' = created automatically, 'manual' = sent by an admin */
   source: 'sensor' | 'manual'
   /** null for a manual notice that has no level */
-  alert_level: AlertLevelCode | null
+  alert_level: AlertRecordLevelCode | null
   alert_label: string | null
   message: string
   /** water level at that moment; null for manual alerts */
@@ -123,7 +125,7 @@ export interface ManualAlertInput {
 }
 
 export interface AlertLevelPatch {
-  /** must keep yellow < evacuation < orange < red */
+  /** must keep yellow < orange < red */
   level_ft: number
 }
 
