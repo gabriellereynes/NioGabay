@@ -225,8 +225,6 @@ onBeforeUnmount(() => {
           and access safety information for your community.
         </p>
 
-      
-
       </div>
     </section>
 
@@ -599,5 +597,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </section>
+
+
   </main>
 </template>

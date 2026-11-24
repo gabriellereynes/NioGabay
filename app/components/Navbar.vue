@@ -43,7 +43,7 @@ const navLinks = [
 
         <NuxtLink
           to="/login"
-          class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+          class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold !text-white shadow-sm transition hover:bg-blue-800"
         >
           Login
         </NuxtLink>
@@ -94,7 +94,6 @@ const navLinks = [
         >
           {{ link.label }}
         </NuxtLink>
-
 
         <!--LOGIN BUTTON-->
         <NuxtLink
