@@ -225,13 +225,6 @@ onBeforeUnmount(() => {
           and access safety information for your community.
         </p>
 
-        <NuxtLink
-          to="/subscribe"
-          class="mt-8 inline-block rounded-lg bg-amber-400 px-6 py-3 font-semibold text-blue-950 shadow-md transition hover:bg-amber-300"
-        >
-          Get SMS Alerts
-        </NuxtLink>
-
       </div>
     </section>
 
@@ -605,31 +598,6 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-
-    <!-- SMS SUBSCRIPTION CTA -->
-    <section class="px-5 pb-16 md:px-8">
-      <div class="mx-auto max-w-7xl rounded-2xl bg-blue-900 px-6 py-10 text-center text-white md:px-12 md:py-14">
-
-        <h2 class="text-2xl font-bold md:text-3xl">
-          Stay Updated. Stay Prepared.
-        </h2>
-
-        <p class="mx-auto mt-4 flex w-full max-w-xl justify-center text-center text-sm leading-relaxed text-blue-100 md:text-base" style="text-align: center;">
-          <span class="block w-full text-center">
-            Subscribe to NioGabay SMS alerts to receive important flood-related
-            notifications and announcements.
-          </span>
-        </p>
-
-        <NuxtLink
-          to="/subscribe"
-          class="mt-7 inline-block rounded-lg bg-amber-400 px-6 py-3 font-semibold text-blue-950 transition hover:bg-amber-300"
-        >
-          Subscribe Now
-        </NuxtLink>
-
-      </div>
-    </section>
 
   </main>
 </template>
